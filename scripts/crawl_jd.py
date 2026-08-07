@@ -200,6 +200,8 @@ def main() -> int:
     parser.add_argument("--hotitem", default=None,
                         help="JD hotitem ranking URL (auto-discovered if absent)")
     parser.add_argument("--time-budget", type=int, default=0)
+    parser.add_argument("--max-pages", type=int, default=0,
+                        help="max list pages to scan (0=unlimited)")
     parser.add_argument("--delay", type=float, default=1.5)
     parser.add_argument("--min-records", type=int, default=50)
     parser.add_argument("--progress-dir", default="crawl_state/jd")
@@ -239,6 +241,9 @@ def main() -> int:
 
     page = progress.current_page
     while not budget.expired():
+        # max_pages=0 表示不限制（0 值语义）
+        if args.max_pages and page > args.max_pages:
+            break
         url = sales_url(hotitem, page)
         try:
             if rotator and rotator.enabled:

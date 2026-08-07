@@ -153,6 +153,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="ZOL AC crawler")
     parser.add_argument("--output", required=True)
     parser.add_argument("--time-budget", type=int, default=0)
+    parser.add_argument("--max-pages", type=int, default=0,
+                        help="max list pages to scan (0=unlimited)")
     parser.add_argument("--delay", type=float, default=1.5)
     parser.add_argument("--min-records", type=int, default=50)
     parser.add_argument("--progress-dir", default="crawl_state/zol")
@@ -183,6 +185,9 @@ def main() -> int:
 
     page = progress.current_page
     while not budget.expired():
+        # max_pages=0 表示不限制（0 值语义）
+        if args.max_pages and page > args.max_pages:
+            break
         url = (
             f"{BASE_URL}/{catalogue}/subcate{sub_id}_0_list_1_0_1_2_0_{page}.html"
         )

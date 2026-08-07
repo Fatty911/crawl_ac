@@ -81,10 +81,20 @@ jobs:
           EXPECTED_COUNT: ${{ env.EXPECTED_COUNT }}
         run: |
           python - <<'PY'
-          import json, os, urllib.request
+          import json, os, time, urllib.request
           url = os.environ["MANIFEST_URL"]
-          with urllib.request.urlopen(url, timeout=60) as resp:
-              deployed = json.loads(resp.read().decode("utf-8"))
+          # 部署后 CDN/Pages 传播有延迟：重试 8 次 × 10s
+          deployed = None
+          for attempt in range(1, 9):
+              try:
+                  with urllib.request.urlopen(url, timeout=60) as resp:
+                      deployed = json.loads(resp.read().decode("utf-8"))
+                  break
+              except Exception as exc:
+                  print(f"manifest fetch attempt {attempt} failed: {exc}")
+                  time.sleep(10)
+          if deployed is None:
+              raise SystemExit("deployed manifest unreachable after retries")
           staged_path = "docs/data/manifest.json"
           if not os.path.exists(staged_path):
               print("no staged manifest (no release data); skip readback")

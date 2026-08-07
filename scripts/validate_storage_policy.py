@@ -21,6 +21,7 @@ ARTIFACT_POLICIES = (
     ("pconline-final-validation-", 14),
     ("single-source-repair-proposal-", 3),
     ("single-source-report-", 7),
+    ("hardware-cache-", 14),
 )
 
 

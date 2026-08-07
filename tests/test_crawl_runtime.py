@@ -35,8 +35,9 @@ def test_budget_expiry_and_disabled():
     disabled = Budget(0)
     assert not disabled.expired()
     assert disabled.remaining() == float("inf")
-    expired = Budget(0.001)
-    time.sleep(0.01)
+    # Windows 定时器精度 ~15.6ms：用 0.05s budget + 0.2s sleep 避免边界抖动
+    expired = Budget(0.05)
+    time.sleep(0.2)
     assert expired.expired()
     assert expired.remaining() == 0.0
 

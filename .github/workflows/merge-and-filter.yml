@@ -111,6 +111,18 @@ jobs:
             --rejected-output data/work/rejected.json \
             --min-source-records 50
 
+      - name: Download previous hardware cache
+        if: steps.artifacts.outputs.skip != 'true'
+        continue-on-error: true
+        run: |
+          mkdir -p crawl_state
+          python scripts/download_latest_crawler_artifact.py \
+            --repo "$GITHUB_REPOSITORY" \
+            --workflow merge-and-filter.yml \
+            --artifact-prefix hardware-cache- \
+            --output crawl_state/hardware_cache.json \
+            --min-records 1 || echo "no previous hardware cache"
+
       - name: AI-extract hardware facts (coil rows / throttle type)
         if: steps.artifacts.outputs.skip != 'true'
         env:
@@ -121,7 +133,18 @@ jobs:
           python scripts/ai_extract_hardware.py \
             --input data/work/candidate.json \
             --output data/work/candidate-hardware.json \
+            --max-items 50 \
             || cp data/work/candidate.json data/work/candidate-hardware.json
+
+      - name: Upload hardware cache for next run
+        if: steps.artifacts.outputs.skip != 'true'
+        continue-on-error: true
+        uses: actions/upload-artifact@main
+        with:
+          name: hardware-cache-${{ github.run_id }}
+          path: crawl_state/hardware_cache.json
+          if-no-files-found: ignore
+          retention-days: 14
 
       - name: Preserve published baseline
         if: steps.artifacts.outputs.skip != 'true'

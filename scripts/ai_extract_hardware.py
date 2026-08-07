@@ -143,13 +143,17 @@ def build_prompt(model: str, brand: str, context: str) -> str:
     )
 
 
-def process_items(items: list[dict[str, Any]]) -> int:
+def process_items(items: list[dict[str, Any]], max_items: int = 50) -> int:
     cache = _load_cache()
     pending = [
         item for item in items
         if str(item.get("throttle_type") or "") == "未知"
         or str(item.get("coil_rows") or "") == "未知"
     ]
+    # 限量处理：每轮最多 max_items 条（0=不限），其余下轮续跑
+    if max_items and len(pending) > max_items:
+        print(f"limiting this run to {max_items} of {len(pending)} pending items")
+        pending = pending[:max_items]
     print(f"pending hardware enrichment: {len(pending)} / {len(items)}")
     updated = 0
     for batch_start in range(0, len(pending), MAX_BATCH):
@@ -197,6 +201,8 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", required=True, help="merged candidate json")
     parser.add_argument("--output", required=True, help="enriched candidate json")
+    parser.add_argument("--max-items", type=int, default=50,
+                        help="max items to enrich per run (0=unlimited)")
     args = parser.parse_args()
 
     data = json.loads(Path(args.input).read_text(encoding="utf-8"))
@@ -204,7 +210,7 @@ def main() -> int:
     if not isinstance(items, list):
         print("FAIL: no items")
         return 2
-    updated = process_items(items)
+    updated = process_items(items, max_items=args.max_items)
     data["items"] = items
     data["pipeline"]["hardware_enriched"] = updated
     out = Path(args.output)

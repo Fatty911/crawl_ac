@@ -25,7 +25,7 @@ REQUIRED_ITEM_FIELDS = (
 )
 
 
-def audit_payload(payload: dict[str, Any], baseline: dict[str, Any] | None) -> list[str]:
+def audit_payload(payload: dict[str, Any], baseline: dict[str, Any] | None = None) -> list[str]:
     errors: list[str] = []
     items = payload.get("items")
     if not isinstance(items, list):

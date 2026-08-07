@@ -14,10 +14,14 @@ from typing import Any
 
 import requests
 
-try:
-    from scripts.merge_data import load_records
-except ModuleNotFoundError:
-    from merge_data import load_records
+def load_records(path: Path) -> list[dict[str, Any]]:
+    """Read ``items`` from a crawler artifact JSON (AC schema)."""
+    try:
+        data = json.loads(Path(path).read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return []
+    items = data.get("items") if isinstance(data, dict) else None
+    return items if isinstance(items, list) else []
 
 API = "https://api.github.com"
 

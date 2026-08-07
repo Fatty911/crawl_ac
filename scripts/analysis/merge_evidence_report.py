@@ -71,7 +71,7 @@ def main() -> int:
             }
         )
     merged = load(args.merged)
-    rejected = load(args.rejected)
+    rejected = items(load(args.rejected))
     rejection_reasons = Counter(
         reason for row in rejected
         for reason in (row.get("reject_reasons") or row.get("reasons") or [])

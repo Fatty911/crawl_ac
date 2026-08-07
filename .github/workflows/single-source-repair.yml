@@ -1,0 +1,63 @@
+name: Single Source Repair
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Merge and Filter"]
+    types: [completed]
+
+permissions:
+  contents: read
+  issues: write
+  actions: write
+
+concurrency:
+  group: single-source-repair
+  cancel-in-progress: false
+
+jobs:
+  analyze:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GH_TOKEN: ${{ secrets.ACTION_PAT || github.token }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@main
+      - name: Set up Python
+        uses: actions/setup-python@main
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Fetch latest published payload
+        run: |
+          mkdir -p data/work
+          curl --fail --silent --show-error --location --retry 5 --retry-delay 5 \
+            --connect-timeout 20 --max-time 180 \
+            "https://ac.jiucai.eu.org/data/latest.json" \
+            -o data/work/latest.json || echo "FETCH_FAILED"
+      - name: Analyze single-source records
+        run: |
+          if [ -s data/work/latest.json ]; then
+            python scripts/analyze_single_source.py \
+              --payload data/work/latest.json \
+              --output data/work/single-source-report.json || true
+          else
+            echo "no published payload; skip"
+          fi
+      - name: Report
+        run: |
+          if [ -f data/work/single-source-report.json ]; then
+            echo "single-source analysis written; see artifact"
+          fi
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@main
+        with:
+          name: single-source-report-${{ github.run_id }}
+          path: data/work/single-source-report.json
+          if-no-files-found: ignore
+          retention-days: 7

@@ -1,0 +1,70 @@
+/* 空调选购数据库 SPA */
+:root {
+  --bg: #f5f7fa;
+  --card: #ffffff;
+  --text: #1f2937;
+  --muted: #6b7280;
+  --accent: #0ea5e9;
+  --accent-dark: #0284c7;
+  --good: #16a34a;
+  --warn: #d97706;
+  --bad: #dc2626;
+  --border: #e5e7eb;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+  background: var(--bg); color: var(--text); line-height: 1.5;
+}
+header {
+  background: linear-gradient(135deg, #0ea5e9, #0284c7);
+  color: #fff; padding: 24px 20px; text-align: center;
+}
+header h1 { font-size: 1.6rem; }
+.subtitle { margin-top: 6px; font-size: 0.85rem; opacity: 0.9; }
+main { max-width: 1200px; margin: 0 auto; padding: 16px; }
+.controls {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 10px; padding: 14px; margin-bottom: 14px;
+}
+.filter-bar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
+.filter-group {
+  display: flex; flex-direction: column; gap: 4px;
+  border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px;
+  background: #fafafa; font-size: 0.85rem;
+}
+.filter-group label { font-weight: 600; color: var(--muted); font-size: 0.78rem; }
+.filter-group .options { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  border: 1px solid var(--border); background: #fff; border-radius: 14px;
+  padding: 3px 10px; cursor: pointer; user-select: none; font-size: 0.8rem;
+}
+.chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.chip.required { border-style: dashed; }
+.chip.required.active { background: var(--accent-dark); }
+.sort-bar { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; }
+.sort-bar select {
+  padding: 5px 8px; border: 1px solid var(--border); border-radius: 6px;
+  background: #fff;
+}
+.result-count { margin-left: auto; color: var(--muted); }
+.table-wrap { overflow-x: auto; background: var(--card); border-radius: 10px; border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 0.82rem; white-space: nowrap; }
+thead th {
+  background: #f1f5f9; padding: 8px 10px; text-align: left;
+  border-bottom: 2px solid var(--border); position: sticky; top: 0;
+  cursor: pointer; user-select: none;
+}
+thead th:hover { color: var(--accent); }
+tbody td { padding: 7px 10px; border-bottom: 1px solid var(--border); }
+tbody tr:hover { background: #f8fafc; }
+td.unknown { color: var(--muted); }
+td.good { color: var(--good); font-weight: 600; }
+td.warn { color: var(--warn); font-weight: 600; }
+td.bad { color: var(--bad); font-weight: 600; }
+.source-tag {
+  display: inline-block; background: #e0f2fe; color: var(--accent-dark);
+  border-radius: 10px; padding: 1px 8px; font-size: 0.72rem; margin-right: 3px;
+}
+footer { text-align: center; color: var(--muted); font-size: 0.75rem; padding: 18px; }
+@media (max-width: 720px) { .filter-bar { flex-direction: column; } }

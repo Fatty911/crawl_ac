@@ -1,0 +1,72 @@
+{
+  "required_conditions": [
+    {
+      "key": "inverter",
+      "value": true,
+      "label": "变频"
+    },
+    {
+      "key": "ac_type",
+      "value": ["壁挂式", "立柜式"],
+      "label": "壁挂/立柜"
+    }
+  ],
+  "default_conditions": [
+    {
+      "key": "throttle_type",
+      "value": "电子膨胀阀",
+      "label": "电子膨胀阀",
+      "negative_label": "非电子膨胀阀"
+    }
+  ],
+  "filter_groups": [
+    {
+      "key": "brand",
+      "label": "品牌",
+      "multi": true
+    },
+    {
+      "key": "ac_type",
+      "label": "类型",
+      "options": ["壁挂式", "立柜式"]
+    },
+    {
+      "key": "hp",
+      "label": "匹数",
+      "multi": true
+    },
+    {
+      "key": "energy_grade",
+      "label": "能效等级",
+      "multi": true
+    },
+    {
+      "key": "throttle_type",
+      "label": "节流装置",
+      "options": ["电子膨胀阀", "毛细管", "未知"]
+    },
+    {
+      "key": "coil_rows",
+      "label": "铜管排数",
+      "options": ["双排", "1.6排", "单排", "未知"]
+    },
+    {
+      "key": "refrigerant",
+      "label": "制冷剂",
+      "multi": true
+    }
+  ],
+  "sort_fields": [
+    {"key": "source_count", "label": "数据来源数（多源优先）"},
+    {"key": "apf", "label": "APF 能效比"},
+    {"key": "air_flow", "label": "循环风量"},
+    {"key": "indoor_noise_max", "label": "内机噪音（低优先）"},
+    {"key": "price", "label": "价格"}
+  ],
+  "columns": [
+    "title", "brand", "model", "ac_type", "hp", "cooling_capacity",
+    "heating_capacity", "air_flow", "apf", "energy_grade", "inverter",
+    "indoor_noise", "outdoor_noise", "throttle_type", "coil_rows",
+    "refrigerant", "price", "launch_date", "source_count"
+  ]
+}

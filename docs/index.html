@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>空调选购数据库 - 前10品牌型号参数</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header>
+  <h1>❄️ 空调选购数据库</h1>
+  <p class="subtitle">中国空调前10品牌 · 多源型号参数（太平洋热度 + ZOL + 京东销量）· 数据每日更新</p>
+</header>
+
+<main>
+  <section class="controls">
+    <div class="filter-bar" id="filter-bar"></div>
+    <div class="sort-bar">
+      <label>排序：</label>
+      <select id="sort-select"></select>
+      <label class="order-label">顺序：</label>
+      <select id="sort-dir">
+        <option value="desc">降序</option>
+        <option value="asc">升序</option>
+      </select>
+      <span class="result-count" id="result-count"></span>
+    </div>
+  </section>
+
+  <section class="table-wrap">
+    <table id="data-table">
+      <thead><tr id="table-head"></tr></thead>
+      <tbody id="table-body"></tbody>
+    </table>
+  </section>
+
+  <footer>
+    <p>数据来源：太平洋电脑网（最热门排序）、中关村在线、京东（15日销量榜）。价格与库存随时变化，站点仅提供结构化选购线索，最终信息以来源页面为准。</p>
+  </footer>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>

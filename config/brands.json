@@ -1,0 +1,12 @@
+[
+  {"slug": "gree", "name": "格力"},
+  {"slug": "midea", "name": "美的"},
+  {"slug": "haier", "name": "海尔"},
+  {"slug": "aux", "name": "奥克斯"},
+  {"slug": "tcl", "name": "TCL"},
+  {"slug": "hisense", "name": "海信"},
+  {"slug": "kelon", "name": "科龙"},
+  {"slug": "changhong", "name": "长虹"},
+  {"slug": "wahin", "name": "华凌"},
+  {"slug": "xiaomi", "name": "小米"}
+]

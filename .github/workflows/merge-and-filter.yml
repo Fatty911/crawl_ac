@@ -1,0 +1,173 @@
+name: Merge and Filter
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Crawl ZOL", "Crawl JD", "Crawl PConline"]
+    types: [completed]
+
+permissions:
+  actions: write
+  contents: write
+
+concurrency:
+  group: merge-and-filter
+  cancel-in-progress: false
+
+jobs:
+  merge:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      GH_TOKEN: ${{ secrets.ACTION_PAT || github.token }}
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@main
+
+      - name: Set up Python
+        uses: actions/setup-python@main
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Wait for sibling crawler artifacts
+        if: github.event_name == 'workflow_run'
+        run: |
+          echo "Waiting 60s for sibling crawler artifacts to finish uploading..."
+          sleep 60
+
+      - name: Download latest complete crawler artifacts
+        id: artifacts
+        run: |
+          mkdir -p data/raw/pconline data/raw/zol data/raw/jd
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+          set +e
+          python scripts/download_latest_crawler_artifact.py \
+            --repo "$GITHUB_REPOSITORY" \
+            --workflow crawl-pconline.yml \
+            --artifact-prefix pconline-data- \
+            --output data/raw/pconline/latest.json \
+            --min-records 50 \
+            2> >(tee "$RUNNER_TEMP/pconline-artifact.err" >&2)
+          pconline_status=$?
+          python scripts/download_latest_crawler_artifact.py \
+            --repo "$GITHUB_REPOSITORY" \
+            --workflow crawl-zol.yml \
+            --artifact-prefix zol-data- \
+            --output data/raw/zol/latest.json \
+            --min-records 50 \
+            2> >(tee "$RUNNER_TEMP/zol-artifact.err" >&2)
+          zol_status=$?
+          python scripts/download_latest_crawler_artifact.py \
+            --repo "$GITHUB_REPOSITORY" \
+            --workflow crawl-jd.yml \
+            --artifact-prefix jd-data- \
+            --output data/raw/jd/latest.json \
+            --min-records 50 \
+            2> >(tee "$RUNNER_TEMP/jd-artifact.err" >&2)
+          jd_status=$?
+          set -e
+
+          if [ "$pconline_status" -ne 0 ] &&
+             [ "$zol_status" -ne 0 ] &&
+             [ "$jd_status" -ne 0 ] &&
+             grep -Fq "no unexpired artifact" "$RUNNER_TEMP/pconline-artifact.err" &&
+             grep -Fq "no unexpired artifact" "$RUNNER_TEMP/zol-artifact.err" &&
+             grep -Fq "no unexpired artifact" "$RUNNER_TEMP/jd-artifact.err"; then
+            echo "No crawler artifacts are available; skipping merge and publish."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # 至少一个源可用即可合并（不要求全部成功）
+          AVAILABLE=""
+          if [ "$pconline_status" -eq 0 ]; then AVAILABLE="$AVAILABLE data/raw/pconline/latest.json"; fi
+          if [ "$zol_status" -eq 0 ]; then AVAILABLE="$AVAILABLE data/raw/zol/latest.json"; fi
+          if [ "$jd_status" -eq 0 ]; then AVAILABLE="$AVAILABLE data/raw/jd/latest.json"; fi
+          echo "AVAILABLE_ARTIFACTS=$AVAILABLE" >> "$GITHUB_ENV"
+
+      - name: Download published baseline
+        if: steps.artifacts.outputs.skip != 'true'
+        run: |
+          mkdir -p baseline
+          gh release download data-latest \
+            --pattern ac-latest.json \
+            --dir baseline || true
+
+      - name: Merge, deduplicate, and enforce publication requirements
+        if: steps.artifacts.outputs.skip != 'true'
+        run: |
+          mkdir -p data/work dist
+          python scripts/merge_data.py \
+            $AVAILABLE_ARTIFACTS \
+            --output data/work/candidate.json \
+            --rejected-output data/work/rejected.json \
+            --min-source-records 50
+
+      - name: AI-extract hardware facts (coil rows / throttle type)
+        if: steps.artifacts.outputs.skip != 'true'
+        env:
+          NVIDIA_NIM_API_KEY: ${{ secrets.NVIDIA_NIM_API_KEY }}
+          VOLCENGINE_AGENT_PLAN_API_KEY: ${{ secrets.VOLCENGINE_AGENT_PLAN_API_KEY }}
+        continue-on-error: true
+        run: |
+          python scripts/ai_extract_hardware.py \
+            --input data/work/candidate.json \
+            --output data/work/candidate-hardware.json \
+            || cp data/work/candidate.json data/work/candidate-hardware.json
+
+      - name: Preserve published baseline
+        if: steps.artifacts.outputs.skip != 'true'
+        run: |
+          python scripts/preserve_publish_baseline.py \
+            --candidate data/work/candidate-hardware.json \
+            --baseline baseline/ac-latest.json \
+            --output dist/ac-latest.json
+
+      - name: Verify no published identity or source regresses
+        if: steps.artifacts.outputs.skip != 'true'
+        run: |
+          python scripts/verify_publish_superset.py \
+            --baseline baseline/ac-latest.json \
+            --candidate dist/ac-latest.json
+          python scripts/audit_pages_payload.py \
+            --payload dist/ac-latest.json \
+            --baseline baseline/ac-latest.json
+
+      - name: Generate merge evidence report
+        if: steps.artifacts.outputs.skip != 'true'
+        run: |
+          python scripts/analysis/merge_evidence_report.py \
+            --raw $AVAILABLE_ARTIFACTS \
+            --merged dist/ac-latest.json \
+            --rejected data/work/rejected.json \
+            --output dist/merge-evidence-report.json
+
+      - name: Create or update rolling data release
+        if: steps.artifacts.outputs.skip != 'true'
+        run: |
+          if gh release view data-latest >/dev/null 2>&1; then
+            gh release edit data-latest \
+              --title "Latest verified AC data" \
+              --notes "Automated verified dataset from PConline, ZOL, and JD."
+          else
+            gh release create data-latest \
+              --target main \
+              --title "Latest verified AC data" \
+              --notes "Automated verified dataset from PConline, ZOL, and JD."
+          fi
+          gh release upload data-latest \
+            dist/ac-latest.json \
+            dist/merge-evidence-report.json \
+            --clobber
+
+      - name: Trigger Pages deployment
+        if: steps.artifacts.outputs.skip != 'true'
+        run: gh workflow run deploy-pages.yml --ref main

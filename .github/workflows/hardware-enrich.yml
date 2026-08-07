@@ -1,0 +1,77 @@
+name: Hardware Enrich
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Merge and Filter"]
+    types: [completed]
+
+permissions:
+  actions: write
+  contents: write
+
+concurrency:
+  group: hardware-enrich
+  cancel-in-progress: false
+
+jobs:
+  enrich:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      GH_TOKEN: ${{ secrets.ACTION_PAT || github.token }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@main
+
+      - name: Set up Python
+        uses: actions/setup-python@main
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Download latest published release
+        run: |
+          mkdir -p release crawl_state
+          gh release download data-latest --pattern ac-latest.json --dir release || { echo "no release yet"; exit 0; }
+
+      - name: Download previous hardware cache
+        continue-on-error: true
+        run: |
+          python scripts/download_latest_crawler_artifact.py             --repo "$GITHUB_REPOSITORY"             --workflow hardware-enrich.yml             --artifact-prefix hardware-cache-             --output crawl_state/hardware_cache.json             --min-records 1 || echo "no previous hardware cache"
+
+      - name: AI-extract hardware facts
+        continue-on-error: true
+        env:
+          NVIDIA_NIM_API_KEY: ${{ secrets.NVIDIA_NIM_API_KEY }}
+          VOLCENGINE_AGENT_PLAN_API_KEY: ${{ secrets.VOLCENGINE_AGENT_PLAN_API_KEY }}
+        run: |
+          if [ -f release/ac-latest.json ]; then
+            python scripts/ai_extract_hardware.py               --input release/ac-latest.json               --output release/ac-latest-hardware.json               --max-items 100
+          fi
+
+      - name: Upload hardware cache for next run
+        continue-on-error: true
+        uses: actions/upload-artifact@main
+        with:
+          name: hardware-cache-${{ github.run_id }}
+          path: crawl_state/hardware_cache.json
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Publish enriched payload back to release
+        continue-on-error: true
+        run: |
+          if [ -f release/ac-latest-hardware.json ]; then
+            gh release upload data-latest release/ac-latest-hardware.json               --repo "$GITHUB_REPOSITORY" --clobber               --target main 2>/dev/null || true
+            # 替换 ac-latest.json 为增强版（保留 pipeline 信息）
+            cp release/ac-latest-hardware.json release/ac-latest.json
+            gh release upload data-latest release/ac-latest.json               --repo "$GITHUB_REPOSITORY" --clobber
+            gh workflow run deploy-pages.yml --ref main
+          fi

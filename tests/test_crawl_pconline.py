@@ -91,6 +91,53 @@ class TestParseDetailSpecs:
         assert mapped["energy_grade"] == "2级"
 
 
+
+
+class TestMaxPagesZeroSemantics:
+    """max_pages=0 表示不限制页数（修复：0 值语义 bug 导致 0 条记录）。"""
+
+    def test_crawl_brand_with_zero_max_pages_fetches_pages(self, monkeypatch):
+        from crawl_pconline import crawl_brand
+        from crawl_runtime import Budget, Progress
+
+        fetched = []
+
+        def fake_get_html(session, url, encoding=None, delay=0.0):
+            fetched.append(url)
+            # 第一页返回真实 fixture（含产品卡）；后续页返回空列表页
+            if len(fetched) == 1:
+                raw = (FIXTURES / "pconline_wahin_list.html").read_bytes()
+                return BeautifulSoup(raw.decode("gb18030", errors="replace"), "html.parser"), url
+            empty = BeautifulSoup(
+                "<html><body><ul id='JlistItems'></ul><div class='page-count'></div></body></html>",
+                "html.parser",
+            )
+            return empty, url
+
+        monkeypatch.setattr("crawl_pconline.get_html", fake_get_html)
+        progress = Progress(current_page=1)
+        items = crawl_brand(None, None, "wahin", "华凌", progress, Budget(60), 0, 0)
+        assert len(items) >= 20, f"max_pages=0 应不限页数，实际 {len(items)} 条"
+        assert len(fetched) >= 2, "应翻页抓取"
+
+    def test_max_pages_caps_pages(self, monkeypatch):
+        from crawl_pconline import crawl_brand
+        from crawl_runtime import Budget, Progress
+
+        fetched = []
+
+        def fake_get_html(session, url, encoding=None, delay=0.0):
+            fetched.append(url)
+            raw = (FIXTURES / "pconline_wahin_list.html").read_bytes()
+            return BeautifulSoup(raw.decode("gb18030", errors="replace"), "html.parser"), url
+
+        monkeypatch.setattr("crawl_pconline.get_html", fake_get_html)
+        progress = Progress(current_page=1)
+        items = crawl_brand(None, None, "wahin", "华凌", progress, Budget(60), 0, 1)
+        assert len(fetched) == 1, f"max_pages=1 应只抓 1 页，实际 {len(fetched)}"
+        assert len(items) >= 20
+
+
 class TestHelpers:
     def test_parse_ac_type(self):
         assert parse_ac_type("挂式空调") == "壁挂式"

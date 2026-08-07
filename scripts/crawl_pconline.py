@@ -349,7 +349,8 @@ def crawl_brand(session: Any, rotator: Any, brand: str, brand_name: str,
     items: list[dict[str, Any]] = []
     page = progress.current_page
     while not budget.expired():
-        if page > max_pages:
+        # max_pages=0 表示不限制（0 值语义：与 laptops PConline 教训一致）
+        if max_pages and page > max_pages:
             break
         url = f"{CATALOGUE_URL.format(brand=brand)}list.shtml" if page == 1 else _page_url(brand, page)
         try:

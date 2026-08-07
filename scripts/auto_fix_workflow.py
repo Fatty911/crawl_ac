@@ -161,7 +161,7 @@ class WorkflowErrorFixer:
         try:
             r = requests.get("https://artificialanalysis.ai/leaderboards/models", timeout=15, headers={"User-Agent": "AutoFix/2.0"})
             if r.status_code != 200: return []
-            
+
             text = r.text.lower()
             mapping = {
                 "claude": "anthropic/claude-opus-4.6",
@@ -172,12 +172,12 @@ class WorkflowErrorFixer:
                 "minimax": "minimax/minimax-m2.7",
                 "mimo": "xiaomi/mimo-v2-pro"
             }
-            
+
             found = []
             for kw in ["gemini", "gpt", "claude", "glm", "minimax", "grok", "mimo", "qwen", "deepseek"]:
                 if kw in text and kw in mapping:
                     found.append(mapping[kw])
-            
+
             print(f"映射结果: {found}")
             return found[:10]
         except Exception as e:
@@ -200,16 +200,16 @@ class WorkflowErrorFixer:
 
         for provider in self.providers:
             print(f"\n尝试 Provider: {provider['name']}")
-            
+
             import json
             try:
                 with open(".ai_model_scores.json", "r") as f:
                     scores = json.load(f)
             except Exception:
                 scores = {}
-            
+
             models = sorted(self._resolve_models(provider), key=lambda m: scores.get(m, 0), reverse=True)
-            
+
             for model in models[:5]:
                 print(f"  → 使用模型: {model}")
                 result = self._call_model(provider, model, error_output, context)
@@ -251,7 +251,7 @@ class WorkflowErrorFixer:
             "temperature": 0.1,
             "max_tokens": 8000
         }
-        
+
         try:
             request_kwargs = {"json": payload, "headers": headers, "timeout": 120}
             if provider.get("proxies"):
@@ -283,7 +283,7 @@ class WorkflowErrorFixer:
         fix = self._parse_json(response)
         if not fix or fix.get("confidence", 0) < 0.6: return False
         print(f"    ★ {provider} ({model}) 成功返回方案。")
-        
+
         for fi in fix.get("files_to_modify", []):
             try:
                 with open(fi["path"], "w", encoding="utf-8") as f:
@@ -291,7 +291,7 @@ class WorkflowErrorFixer:
                 print(f"    ✓ 修改文件: {fi['path']}")
             except Exception as e:
                 print(f"    ✗ 文件修改失败: {e}")
-                
+
         for cmd in fix.get("commands", []):
             print(f"    执行: {cmd}")
             subprocess.run(cmd, shell=True, timeout=300)
@@ -321,7 +321,7 @@ class WorkflowErrorFixer:
                 subprocess.run("git checkout -- .", shell=True)
                 return False
             print("    ✓ 语法校验通过")
-            
+
             try:
                 import json
                 scores = {}

@@ -32,7 +32,7 @@ if hasattr(sys.stderr, "reconfigure"):
 
 class SyntaxValidator:
     """代码语法校验器"""
-    
+
     LANG_MAP = {
         ".py": "Python",
         ".js": "JavaScript",
@@ -56,7 +56,7 @@ class SyntaxValidator:
         ".md": "Markdown",
         ".txt": "Text",
     }
-    
+
     SKIP_PATTERNS = [
         r"package-lock\.json$",
         r"yarn\.lock$",
@@ -73,11 +73,11 @@ class SyntaxValidator:
         r"__pycache__/",
         r"\.pyc$",
     ]
-    
+
     def __init__(self, repo_root: str = "."):
         self.repo_root = Path(repo_root).resolve()
         self.results = []
-        
+
     def _should_skip(self, file_path: Path) -> bool:
         """检查是否应该跳过该文件"""
         path_str = str(file_path).replace("\\", "/")
@@ -85,11 +85,11 @@ class SyntaxValidator:
             if re.search(pattern, path_str, re.IGNORECASE):
                 return True
         return False
-    
+
     def get_modified_files(self) -> List[Path]:
         """获取已修改的文件列表（staged + unstaged）"""
         files = set()
-        
+
         result = subprocess.run(
             ["git", "diff", "--name-only", "--cached"],
             capture_output=True, text=True, cwd=self.repo_root
@@ -97,7 +97,7 @@ class SyntaxValidator:
         for f in result.stdout.strip().split("\n"):
             if f:
                 files.add(self.repo_root / f)
-        
+
         result = subprocess.run(
             ["git", "diff", "--name-only"],
             capture_output=True, text=True, cwd=self.repo_root
@@ -105,9 +105,9 @@ class SyntaxValidator:
         for f in result.stdout.strip().split("\n"):
             if f:
                 files.add(self.repo_root / f)
-        
+
         return sorted([f for f in files if f.exists() and f.is_file()])
-    
+
     def get_changed_in_commit(self, commit_hash: str = "HEAD") -> List[Path]:
         """获取指定提交中修改的文件"""
         result = subprocess.run(
@@ -121,7 +121,7 @@ class SyntaxValidator:
                 if path.exists():
                     files.append(path)
         return sorted(files)
-    
+
     def validate_python(self, file_path: Path) -> Tuple[bool, str]:
         """验证 Python 文件语法"""
         try:
@@ -138,7 +138,7 @@ class SyntaxValidator:
             return False, "Timeout"
         except Exception as e:
             return False, str(e)
-    
+
     def validate_javascript(self, file_path: Path) -> Tuple[bool, str]:
         """验证 JavaScript 文件语法"""
         try:
@@ -153,7 +153,7 @@ class SyntaxValidator:
             return True, "SKIPPED (node not found)"
         except Exception as e:
             return True, f"SKIPPED ({e})"
-    
+
     def validate_typescript(self, file_path: Path) -> Tuple[bool, str]:
         """验证 TypeScript 文件语法"""
         try:
@@ -169,7 +169,7 @@ class SyntaxValidator:
             return True, "SKIPPED (tsc not found)"
         except Exception as e:
             return True, f"SKIPPED ({e})"
-    
+
     def validate_json(self, file_path: Path) -> Tuple[bool, str]:
         """验证 JSON 文件语法"""
         try:
@@ -180,7 +180,7 @@ class SyntaxValidator:
             return False, f"Line {e.lineno}, Col {e.colno}: {e.msg}"
         except Exception as e:
             return False, str(e)
-    
+
     def validate_yaml(self, file_path: Path) -> Tuple[bool, str]:
         """验证 YAML 文件语法"""
         try:
@@ -194,7 +194,7 @@ class SyntaxValidator:
             return True, "SKIPPED (pyyaml not installed)"
         except Exception as e:
             return False, str(e)
-    
+
     def validate_shell(self, file_path: Path) -> Tuple[bool, str]:
         """验证 Shell 脚本语法"""
         try:
@@ -207,7 +207,7 @@ class SyntaxValidator:
             return False, (result.stderr or result.stdout)[:200]
         except Exception as e:
             return True, f"SKIPPED ({e})"
-    
+
     def validate_css(self, file_path: Path) -> Tuple[bool, str]:
         """验证 CSS/SCSS/Less 文件语法（基本检查）"""
         try:
@@ -218,7 +218,7 @@ class SyntaxValidator:
             return True, "OK (basic check)"
         except Exception as e:
             return False, str(e)
-    
+
     def validate_html(self, file_path: Path) -> Tuple[bool, str]:
         """验证 HTML 文件语法（基本检查）"""
         try:
@@ -231,7 +231,7 @@ class SyntaxValidator:
             return True, "OK (basic check)"
         except Exception as e:
             return False, str(e)
-    
+
     def validate_xml(self, file_path: Path) -> Tuple[bool, str]:
         """验证 XML 文件语法"""
         try:
@@ -242,12 +242,12 @@ class SyntaxValidator:
             return False, str(e)
         except Exception as e:
             return False, str(e)
-    
+
     def validate_file(self, file_path: Path) -> Dict:
         """验证单个文件"""
         ext = file_path.suffix.lower()
         lang = self.LANG_MAP.get(ext, "Unknown")
-        
+
         if self._should_skip(file_path):
             return {
                 "file": str(file_path.relative_to(self.repo_root)),
@@ -255,7 +255,7 @@ class SyntaxValidator:
                 "passed": True,
                 "message": "SKIPPED (lock/minified/generated file)"
             }
-        
+
         validators = {
             ".py": self.validate_python,
             ".js": self.validate_javascript,
@@ -277,7 +277,7 @@ class SyntaxValidator:
             ".xml": self.validate_xml,
             ".svg": self.validate_xml,
         }
-        
+
         validator = validators.get(ext)
         if validator:
             passed, message = validator(file_path)
@@ -285,36 +285,36 @@ class SyntaxValidator:
             passed, message = True, "OK (text file)"
         else:
             passed, message = True, f"SKIPPED (no validator for {ext})"
-        
+
         return {
             "file": str(file_path.relative_to(self.repo_root)),
             "language": lang,
             "passed": passed,
             "message": message
         }
-    
+
     def validate_all(self, files: List[Path] = None) -> Tuple[bool, List[Dict]]:
         """验证所有文件"""
         if files is None:
             files = self.get_modified_files()
-        
+
         if not files:
             return True, []
-        
+
         print(f"\n{'='*70}")
         print(f"🔍 语法校验 - 共 {len(files)} 个文件")
         print(f"{'='*70}\n")
-        
+
         all_passed = True
         self.results = []
-        
+
         for file_path in files:
             result = self.validate_file(file_path)
             self.results.append(result)
-            
+
             status = "✓" if result["passed"] else "✗"
             skip_marker = "⊘" if "SKIPPED" in result["message"] else ""
-            
+
             if result["passed"]:
                 if skip_marker:
                     print(f"  {skip_marker} {result['file']} ({result['language']}): {result['message']}")
@@ -324,7 +324,7 @@ class SyntaxValidator:
                 print(f"  {status} {result['file']} ({result['language']}): FAILED")
                 print(f"      {result['message'][:150]}")
                 all_passed = False
-        
+
         print(f"\n{'='*70}")
         if all_passed:
             print("✅ 所有文件语法校验通过")
@@ -334,9 +334,9 @@ class SyntaxValidator:
             for r in failed:
                 print(f"   - {r['file']}")
         print(f"{'='*70}\n")
-        
+
         return all_passed, self.results
-    
+
     def save_report(self, output_path: str):
         """保存校验报告"""
         report = {
@@ -347,10 +347,10 @@ class SyntaxValidator:
             "failed": sum(1 for r in self.results if not r["passed"]),
             "results": self.results
         }
-        
+
         with open(output_path, "w", encoding="utf-8") as f:
             json.dump(report, f, indent=2, ensure_ascii=False)
-        
+
         print(f"📄 报告已保存: {output_path}")
 
 
@@ -373,9 +373,9 @@ def main():
     parser.add_argument("--report", help="保存校验报告的 JSON 文件路径")
     parser.add_argument("--quiet", action="store_true", help="静默模式，只输出错误")
     args = parser.parse_args()
-    
+
     validator = SyntaxValidator(args.repo)
-    
+
     if args.files:
         files = [
             (Path(f) if Path(f).is_absolute() else validator.repo_root / f).resolve()
@@ -385,12 +385,12 @@ def main():
         files = validator.get_changed_in_commit(args.commit)
     else:
         files = None
-    
+
     passed, results = validator.validate_all(files)
-    
+
     if args.report:
         validator.save_report(args.report)
-    
+
     sys.exit(0 if passed else 1)
 
 

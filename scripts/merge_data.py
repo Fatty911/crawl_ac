@@ -80,7 +80,7 @@ def normalize_model_identity(text: Any) -> str:
     """
     original = unicodedata.normalize("NFKC", str(text or "")).translate(_ROMAN)
     match = re.search(
-        r"(KFRD?|KFD?|KF)\s*[-－]?\s*(\d{2,3})\s*([A-Z]{1,6})?\s*/?\s*([0-9A-Za-zⅢⅣ-]{2,30})",
+        r"(KFRD?|KFD?|KF)\s*[-－]?\s*(\d{2,3})\s*([A-Z]{1,6})?\s*/?\s*([0-9A-Za-zⅢⅣ()\-]{2,40})",
         original,
     )
     if not match:
@@ -163,7 +163,7 @@ def merge_group(identity: str, rows: list[dict[str, Any]]) -> dict[str, Any]:
     merged: dict[str, Any] = {
         "identity_key": identity,
         "title": "",
-        "model": identity,
+        "model": "",
         "brand": "",
         "source_count": len(rows),
         "atomic_source_names": [],

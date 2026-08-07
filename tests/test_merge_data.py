@@ -35,6 +35,14 @@ class TestNormalizeModelIdentity:
         assert normalize_model_identity("空调配件铜管5米") == ""
 
 
+
+    def test_paren_variant_kept(self):
+        # 格力带括号内部代号：不同机型不得错误合并
+        assert normalize_model_identity("格力KFR-35GW/(35504)FNhAj-B1") == "kfr35gw/(35504)fnhaj-b1"
+        assert normalize_model_identity("格力KFR-35GW/(35505)FNhAj-B1") == "kfr35gw/(35505)fnhaj-b1"
+        assert normalize_model_identity("格力KFR-35GW/(35504)FNhAj-B1") != normalize_model_identity("格力KFR-35GW/(35505)FNhAj-B1")
+
+
 class TestParseHelpers:
     def test_parse_hp(self):
         assert parse_hp("1.5匹") == 1.5

@@ -109,6 +109,8 @@ jobs:
           except Exception as exc:
               print(f"version check failed ({exc}); proceeding with publish")
           PY
+            # 用增强版（含硬件参数）覆盖主 asset 再上传
+            cp release/ac-latest-hardware.json release/ac-latest.json
             gh release upload data-latest release/ac-latest.json \
               --repo "$GITHUB_REPOSITORY" --clobber
             gh workflow run deploy-pages.yml --ref main

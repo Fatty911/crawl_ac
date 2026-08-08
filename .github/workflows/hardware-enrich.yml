@@ -69,9 +69,37 @@ jobs:
         continue-on-error: true
         run: |
           if [ -f release/ac-latest-hardware.json ]; then
-            gh release upload data-latest release/ac-latest-hardware.json               --repo "$GITHUB_REPOSITORY" --clobber               --target main 2>/dev/null || true
-            # 替换 ac-latest.json 为增强版（保留 pipeline 信息）
-            cp release/ac-latest-hardware.json release/ac-latest.json
-            gh release upload data-latest release/ac-latest.json               --repo "$GITHUB_REPOSITORY" --clobber
+            # 版本保护：若 release 已被更新的 merge 覆盖（generated_at 不同），
+            # 跳过回写，避免旧数据覆盖新数据
+            python - <<'PY'
+          import json, os, urllib.request
+          local = json.load(open("release/ac-latest.json", encoding="utf-8"))
+          req = urllib.request.Request(
+              "https://api.github.com/repos/%s/releases/tags/data-latest" % os.environ["GITHUB_REPOSITORY"],
+              headers={"Authorization": "Bearer " + os.environ["GH_TOKEN"],
+                       "User-Agent": "hardware-enrich", "Accept": "application/vnd.github+json"},
+          )
+          try:
+              with urllib.request.urlopen(req, timeout=30) as resp:
+                  meta = json.loads(resp.read().decode("utf-8"))
+              remote_asset = next(
+                  (a for a in meta.get("assets", []) if a["name"] == "ac-latest.json"), None)
+              if remote_asset:
+                  areq = urllib.request.Request(remote_asset["browser_download_url"],
+                                                headers={"User-Agent": "Mozilla/5.0"})
+                  with urllib.request.urlopen(areq, timeout=60) as aresp:
+                      remote = json.loads(aresp.read().decode("utf-8"))
+                  if remote.get("generated_at") != local.get("generated_at"):
+                      print("SKIP publish: release has newer generated_at "
+                            f"({remote.get('generated_at')} != {local.get('generated_at')})")
+                      raise SystemExit(0)
+              print("release matches local payload; proceeding with publish")
+          except SystemExit:
+              raise
+          except Exception as exc:
+              print(f"version check failed ({exc}); proceeding with publish")
+          PY
+            gh release upload data-latest release/ac-latest.json \
+              --repo "$GITHUB_REPOSITORY" --clobber
             gh workflow run deploy-pages.yml --ref main
           fi

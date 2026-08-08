@@ -35,15 +35,19 @@ MAX_RETRIES = 3
 MIN_REQUEST_INTERVAL = 0.8
 _last_request_time = 0.0
 
-# 免费优先端点路由（与 free_first_router.py 相同策略，顺序即优先级）
+# 端点路由：按优先级自动切换（免费优先 → 单家 Plan），复用 review_router 思路
 ENDPOINTS = (
     ("NVIDIA_NIM_API_KEY", "https://integrate.api.nvidia.com/v1/chat/completions",
      "z-ai/glm-5.2"),
-    ("NVIDIA_NIM_API_KEY", "https://integrate.api.nvidia.com/v1/chat/completions",
-     "moonshotai/kimi-k2.6"),
+    ("VOLCENGINE_CODING_PLAN_API_KEY",
+     "https://ark.cn-beijing.volces.com/api/coding/v3/chat/completions",
+     "glm-5.2"),
     ("VOLCENGINE_AGENT_PLAN_API_KEY",
      "https://ark.cn-beijing.volces.com/api/v3/chat/completions",
-     "deepseek-v4-flash"),
+     "glm-5.2"),
+    ("KIMI_CODING_PLAN_API_KEY",
+     "https://api.kimi.com/coding/v1/chat/completions",
+     "k3"),
 )
 
 KEY_HINTS = {
@@ -74,16 +78,22 @@ def _get_key(name: str) -> str:
 
 
 def _llm_call(prompt: str) -> str | None:
-    """Free-first LLM call; returns raw assistant text or None."""
+    """Endpoint auto-switch LLM call; returns raw assistant text or None.
+
+    Each round tries every configured endpoint once (fast-fail on 401/403
+    saves time); after a full round with no success it backs off briefly and
+    starts another round (max MAX_RETRIES rounds).  A single endpoint failure
+    never blocks the next endpoint.
+    """
     global _last_request_time
-    elapsed = time.monotonic() - _last_request_time
-    if elapsed < MIN_REQUEST_INTERVAL:
-        time.sleep(MIN_REQUEST_INTERVAL - elapsed)
-    for key_name, url, model in ENDPOINTS:
-        key = _get_key(key_name)
-        if not key:
-            continue
-        for attempt in range(1, MAX_RETRIES + 1):
+    for _round in range(1, MAX_RETRIES + 1):
+        for key_name, url, model in ENDPOINTS:
+            key = _get_key(key_name)
+            if not key:
+                continue
+            elapsed = time.monotonic() - _last_request_time
+            if elapsed < MIN_REQUEST_INTERVAL:
+                time.sleep(MIN_REQUEST_INTERVAL - elapsed)
             try:
                 body = json.dumps({
                     "model": model,
@@ -100,9 +110,9 @@ def _llm_call(prompt: str) -> str | None:
                 _last_request_time = time.monotonic()
                 return data["choices"][0]["message"]["content"]
             except Exception as exc:
-                print(f"LLM {model} attempt {attempt} failed: {type(exc).__name__}")
-                if attempt < MAX_RETRIES:
-                    time.sleep(2 ** attempt)
+                print(f"LLM {model} round {_round} failed: {type(exc).__name__}")
+        if _round < MAX_RETRIES:
+            time.sleep(2 ** _round)
     return None
 
 

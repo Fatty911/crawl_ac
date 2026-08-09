@@ -1623,9 +1623,9 @@
   "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: 未知\n备注: 联网未能检索到“海尔 KFR-35GW/81@U1-Gn”型号的专业拆机评测报告或官方详细硬件用料参数表，无法确切查证其换热器铜管排数和节流装置类型，未作任何猜测。"
  },
  "kfr35gw/zdcsw1": {
-  "evidence_url": "https://www.changhong.com/products/jiadian/kongtiao/2024nianxinkuanA1ji1-5pNSfuwenguaishiyong.html",
+  "note": "no positive evidence in answer",
   "final": false,
-  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: https://www.changhong.com/products/jiadian/kongtiao/2024nianxinkuanA1ji1-5pNSfuwenguaishiyong.html\n备注: 各大搜索引擎及电商平台的评测文章与商品详情页均未提及该型号的换热器排数与节流装置类型，厂商官网也无此两项详细硬件规格，严格按照要求不进行猜测。"
+  "answer_excerpt": "```json\n{\"ac_type\": \"壁挂式\", \"hp\": \"1.5匹\", \"cooling_capacity\": 3510.0, \"title\": \"长虹KFR-35GW/ZDCSW1+R1\"}\n```\n\n我来查证长虹 KFR-35GW/ZDCSW1+R1 的硬件用料信息。"
  },
  "kfr35gw/06eds81": {
   "evidence_url": "https://www.gree.com",
@@ -1652,5 +1652,17 @@
   "evidence_url": "https://zhuanlan.zhihu.com/p/641653519",
   "final": true,
   "answer_excerpt": "铜管排数: 1.6排\n节流装置: 电子膨胀阀\n来源: https://zhuanlan.zhihu.com/p/641653519\n备注: 基于数码家电领域拆机评测数据，该型号采用1.6排冷凝器和电子膨胀阀，在同级别大1匹机型中用料属于主流扎实水平。"
+ },
+ "kfr72lw/(72530)fnhad-b1": {
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://www.bilibili.com/video/BV1Dm4y1H7V7/",
+  "final": true,
+  "answer_excerpt": "铜管排数: 双排\n节流装置: 电子膨胀阀\n来源: https://www.bilibili.com/video/BV1Dm4y1H7V7/ （B站拆机评测视频简介及评论区） / https://www.smzdm.com/p/60894756/ （什么"
+ },
+ "kfr72lw/(72567)fnhab-b1": {
+  "note": "no positive evidence in answer",
+  "final": false,
+  "answer_excerpt": "在进行网络搜索后，未找到针对该具体型号的拆机评测或包含详细硬件用料（如铜管排数、节流装置类型）的商品页和厂商参数表。因此无法确认这两项硬件信息。\n\n铜管排数: 未知\n节流装置: 未知\n来源: 无\n备注: 经联网搜索，未找到该型号的拆机评测或详细硬件用料参数。"
  }
 }

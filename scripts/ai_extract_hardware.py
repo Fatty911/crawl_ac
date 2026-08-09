@@ -35,15 +35,14 @@ MAX_RETRIES = 3
 MIN_REQUEST_INTERVAL = 0.8
 _last_request_time = 0.0
 
-# 端点路由：按优先级自动切换（免费优先 → 单家 Plan），复用 review_router 思路
+# 端点路由：按优先级自动切换（免费优先 → 单家 Plan）。
+# 实测（2026-08-08）：volcengine-agentplan key 401 无效；只有 coding 组合可用。
+# AgentPlan 与 CodingPlan 是独立套餐（独立 key/独立 baseURL），不可互换。
 ENDPOINTS = (
-    ("NVIDIA_NIM_API_KEY", "https://integrate.api.nvidia.com/v1/chat/completions",
+    ("NVIDIA_API_KEY", "https://integrate.api.nvidia.com/v1/chat/completions",
      "z-ai/glm-5.2"),
     ("VOLCENGINE_CODING_PLAN_API_KEY",
      "https://ark.cn-beijing.volces.com/api/coding/v3/chat/completions",
-     "glm-5.2"),
-    ("VOLCENGINE_AGENT_PLAN_API_KEY",
-     "https://ark.cn-beijing.volces.com/api/v3/chat/completions",
      "glm-5.2"),
     ("KIMI_CODING_PLAN_API_KEY",
      "https://api.kimi.com/coding/v1/chat/completions",
@@ -73,21 +72,10 @@ def _save_cache(cache: dict[str, dict[str, Any]]) -> None:
     )
 
 
-# 端点 key 环境变量别名（workflow 可能只传其中一个名字）
-KEY_ALIASES = {
-    "VOLCENGINE_CODING_PLAN_API_KEY": ("VOLCENGINE_CODING_PLAN_API_KEY",
-                                       "VOLCENGINE_AGENT_PLAN_API_KEY"),
-    "VOLCENGINE_AGENT_PLAN_API_KEY": ("VOLCENGINE_AGENT_PLAN_API_KEY",
-                                      "VOLCENGINE_CODING_PLAN_API_KEY"),
-}
-
-
 def _get_key(name: str) -> str:
-    for candidate in KEY_ALIASES.get(name, (name,)):
-        value = os.environ.get(candidate, "")
-        if value:
-            return value
-    return ""
+    # 注意：Provider 套餐 key 独立授权，不做跨套餐别名回退
+    # （AgentPlan/CodingPlan key 不能互换，实测 agentplan key 401 无效）
+    return os.environ.get(name, "")
 
 
 def _llm_call(prompt: str) -> str | None:

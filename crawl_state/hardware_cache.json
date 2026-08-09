@@ -1580,5 +1580,41 @@
   "evidence_url": "https://www.zhihu.com/question/585213532/answer/3483521152",
   "final": true,
   "note": "rebuilt from release"
+ },
+ "kfr35gw/nhgn1bg": {
+  "coil_rows": "1.6排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://www.sohu.com/a/739971266_121124024",
+  "final": true,
+  "answer_excerpt": "铜管排数: 1.6排\n节流装置: 电子膨胀阀\n来源: https://www.sohu.com/a/739971266_121124024\n备注: 经查证多篇拆机评测，该机型（云之舒）采用1.6排冷凝器铜管和电子膨胀阀。"
+ },
+ "kfr72lw/(72508)fnhca-b1": {
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://www.zhihu.com/question/477770421/answer/2753522328",
+  "final": true,
+  "answer_excerpt": "铜管排数: 未知\n节流装置: 电子膨胀阀\n来源: https://www.zhihu.com/question/477770421/answer/2753522328 （注：该评测汇总页面提及格力3匹机型普遍采用双排铜管及电子膨胀阀，但未明确指向此具体型号(72508)FNhCa-B1，具体型号拆机详评暂未在公开评测中检索到）\n备注: 经联网检索，未找到专门针对 KFR-72LW/(72508)F"
+ },
+ "kfr35gw/(35504)fnhaa-b1": {
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://www.sohu.com/a/532580234_121124414",
+  "final": true,
+  "answer_excerpt": "经过联网搜索查证，针对格力 KFR-35GW/(35504)FnAa-B1（云佳系列）的硬件用料，结果如下：\n\n铜管排数: 双排\n节流装置: 电子膨胀阀\n来源: https://www.sohu.com/a/532580234_121124414\n备注: 多家拆机评测显示该型号（云佳1.5匹新一级）外机采用双排冷凝器铜管，且节流装置为电子膨胀阀。"
+ },
+ "kfr35gw/(35546)fnhac-b1": {
+  "throttle_type": "电子膨胀阀",
+  "final": false,
+  "answer_excerpt": "<action>\n<search>格力 KFR-35GW/(35546)FNhAc-B1 拆机</search>\n</action>\n<action>\n<search>格力 智慧鸟 KFR-35GW/(35546)FNhAc-B1 电子膨胀阀</search>\n</action>\n<action>\n<search>格力 KFR-35GW/(35546)FNhAc-B1 参数</search>\n</"
+ },
+ "kfr26gw/(26546)fnhac-b1": {
+  "throttle_type": "电子膨胀阀",
+  "final": false,
+  "answer_excerpt": "<tool_search>\n查询参数：\n- query: KFR-26GW/(26546)FNhAc-B1 拆机\n</tool_search>\n<tool_search>\n查询参数：\n- query: 格力 智慧鸟 KFR-26GW/(26546)FNhAc-B1 电子膨胀阀\n</tool_search>"
+ },
+ "kfr50lw/nhaj1bgj": {
+  "note": "no positive evidence in answer",
+  "final": false,
+  "answer_excerpt": "为了查证格力 KFR-50LW/NhAj1BGj 的硬件用料，我将联网搜索相关拆机评测和商品详情。"
  }
 }

@@ -5,6 +5,9 @@ on:
   workflow_run:
     workflows: ["Merge and Filter"]
     types: [completed]
+  schedule:
+    # 每小时自动跑一轮渐进提取（无新 merge 时也持续推进剩余条目）
+    - cron: "37 * * * *"
 
 permissions:
   actions: write
@@ -82,7 +85,8 @@ jobs:
       - name: Publish enriched payload back to release
         continue-on-error: true
         run: |
-          if [ -f release/ac-latest-hardware.json ]; then
+          # 无实际变化（0 touched）时不发布、不触发 deploy
+          if [ -f release/ac-latest-hardware.json ] && ! cmp -s release/ac-latest.json release/ac-latest-hardware.json; then
             # 版本保护：若 release 已被更新的 merge 覆盖（generated_at 不同），
             # 跳过回写，避免旧数据覆盖新数据
             python - <<'PY'

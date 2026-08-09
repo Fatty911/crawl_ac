@@ -1279,5 +1279,15 @@
   "note": "no positive evidence in answer",
   "final": false,
   "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: 无有效来源URL\n备注: 经联网查证，未能在评测文章、商品详情页或厂商参数表中找到该具体型号（KFR-26GW/(26564)FNhAc-B1）关于换热器铜管排数与节流装置的明确拆机用料信息，按照要求不作猜测。"
+ },
+ "kfr26gw/n8hg1": {
+  "throttle_type": "电子膨胀阀",
+  "final": false,
+  "answer_excerpt": "```json\n{\"name\": \"web_search\", \"arguments\": {\"query\": \"华凌 KFR-26GW/N8HG1 拆机 铜管排数 电子膨胀阀\"}}\n```"
+ },
+ "kfr26gw/nhgt1bgj": {
+  "note": "no positive evidence in answer",
+  "final": false,
+  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: 无\n备注: 经多渠道联网检索，未能找到针对该具体型号（KFR-26GW/NhGt1BGj）的拆机评测报告或详细硬件用料参数，官方详情页亦未明确披露这两项硬件规格。"
  }
 }

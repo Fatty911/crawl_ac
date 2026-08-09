@@ -36,13 +36,17 @@ MIN_REQUEST_INTERVAL = 0.8
 _last_request_time = 0.0
 
 # 端点路由：按优先级自动切换（免费优先 → 单家 Plan）。
-# 实测（2026-08-08）：volcengine-agentplan key 401 无效；只有 coding 组合可用。
-# AgentPlan 与 CodingPlan 是独立套餐（独立 key/独立 baseURL），不可互换。
+# 官方端点（2026-08-08 用户提供+实测）：
+#   CodingPlan OpenAI 兼容 = /api/coding/v3；AgentPlan OpenAI 兼容 = /api/plan/v3
+# 两个套餐独立 key 独立 baseURL，不可互换；agentplan key × plan/v3 实测可用。
 ENDPOINTS = (
     ("NVIDIA_API_KEY", "https://integrate.api.nvidia.com/v1/chat/completions",
      "z-ai/glm-5.2"),
     ("VOLCENGINE_CODING_PLAN_API_KEY",
      "https://ark.cn-beijing.volces.com/api/coding/v3/chat/completions",
+     "glm-5.2"),
+    ("VOLCENGINE_AGENT_PLAN_API_KEY",
+     "https://ark.cn-beijing.volces.com/api/plan/v3/chat/completions",
      "glm-5.2"),
     ("KIMI_CODING_PLAN_API_KEY",
      "https://api.kimi.com/coding/v1/chat/completions",

@@ -1234,5 +1234,50 @@
   "throttle_type": "电子膨胀阀",
   "final": false,
   "answer_excerpt": "小米KFR-26GW/N1A1 拆机评测 铜管排数 电子膨胀阀"
+ },
+ "kfr51lw/n8hb1": {
+  "coil_rows": "单排",
+  "throttle_type": "电子膨胀阀",
+  "final": false,
+  "answer_excerpt": "我需要联网搜索华凌KFR-51LW/N8HB1空调的硬件用料信息。让我开始搜索。1.  **分析请求：**\n    *   空调型号：华凌 华凌KFR-51LW/N8HB1\n    *   已知信息：立柜式，2.0P，制冷量5110.0W\n    *   需要查找：\n        1.  外机换热器铜管排数（如单排、1.6排、双排）。\n        2.  节流装置类型（电子膨胀阀/毛细管）。"
+ },
+ "kfr35gw/n8hb1": {
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://zhuanlan.zhihu.com/p/338322058",
+  "final": true,
+  "answer_excerpt": "铜管排数: 双排\n节流装置: 电子膨胀阀\n来源: https://zhuanlan.zhihu.com/p/338322058\n备注: 根据多篇拆机评测显示，华凌N8HB1 1.5匹新一级外机采用双排冷凝器铜管和三花电子膨胀阀。"
+ },
+ "kfr26gw/(26587)fnhae-b1(wifi)": {
+  "throttle_type": "电子膨胀阀",
+  "final": false,
+  "answer_excerpt": "```json\n[{\"name\": \"web_search\", \"arguments\": {\"query\": \"格力 KFR-26GW/(26587)FNhAe-B1 拆机 铜管排数 电子膨胀阀\"}}]\n```"
+ },
+ "kfr50lw/(50527)fnhab-b1(wifi)": {
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://www.zhihu.com/question/476654285/answer/2030562552",
+  "final": true,
+  "answer_excerpt": "通过联网搜索相关信息，查证结果如下：\n\n铜管排数: 双排\n节流装置: 电子膨胀阀\n来源: https://www.zhihu.com/question/476654285/answer/2030562552 (拆机评测参考) / https://item.jd.com/100022553446.html (商品详情页参数参考)\n备注: 多个拆机评测及电商详情页显示，格力京湃2匹（50527）外机采"
+ },
+ "kfr35gw/nhpb1bg": {
+  "note": "no positive evidence in answer",
+  "final": false,
+  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: 未知\n备注: 经联网搜索，未能找到针对该型号拆机评测或官方详细硬件用料说明。"
+ },
+ "kfr50lw/(50501)fnhaa-b1(wifi)": {
+  "note": "no positive evidence in answer",
+  "final": false,
+  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: 无法提供有效URL\n备注: 经联网检索，未能找到针对该“玫瑰”系列 konkret 型号拆机评测或包含节流装置与铜管排数详细硬件用料的厂商/电商参数页，按要求不进行猜测。"
+ },
+ "kfr35gw/nhla1baj": {
+  "note": "no positive evidence in answer",
+  "final": false,
+  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: 未知\n备注: 连网检索未能找到格力KFR-35GW/NhLa1BAj的第三方专业拆机评测报告或详尽官方物料清单，无法确切查证其外机换热器铜管排数及节流装置具体类型，严格按照要求不做主观猜测。"
+ },
+ "kfr26gw/(26564)fnhac-b1": {
+  "note": "no positive evidence in answer",
+  "final": false,
+  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: 无有效来源URL\n备注: 经联网查证，未能在评测文章、商品详情页或厂商参数表中找到该具体型号（KFR-26GW/(26564)FNhAc-B1）关于换热器铜管排数与节流装置的明确拆机用料信息，按照要求不作猜测。"
  }
 }

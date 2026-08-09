@@ -235,6 +235,27 @@ class TestValueNormalization:
         assert normalize_brand("格力") == "格力"
 
 
+
+
+    def test_3p_wall_mounted_apf_floor(self):
+        """3匹挂机（72GW）APF 按柜机标准 4.2（大匹数挂机天花板低）。"""
+        from merge_data import check_publication, tier_apf_floor
+        assert tier_apf_floor("壁挂式", "3匹") == 4.2
+        assert tier_apf_floor("壁挂式", "2匹") == 4.2
+        assert tier_apf_floor("壁挂式", "1.5匹") == 5.0
+        assert tier_apf_floor("立柜式", "3匹") == 4.2
+        item = {"identity_key": "kfr72gw/x", "brand": "格力", "model": "KFR-72GW/X",
+                "ac_type": "壁挂式", "inverter": True, "apf": 4.48, "hp": "3匹",
+                "atomic_source_names": ["PConline"], "source_count": 1,
+                "source_urls": ["u"], "source_ranks": []}
+        ok, reasons = check_publication(item)
+        assert ok, f"3匹挂机应通过：{reasons}"
+        # 1.5匹挂机保持严格
+        item2 = dict(item, hp="1.5匹", apf=4.8)
+        ok2, _ = check_publication(item2)
+        assert not ok2, "1.5匹挂机 APF<5.0 应拒绝"
+
+
 class TestMergeGroup:
     def _row(self, source, pid, **fields):
         row = {

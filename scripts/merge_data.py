@@ -190,13 +190,29 @@ def parse_apf(value: Any) -> float | None:
     return float(match.group(1)) if match else None
 
 
-def tier_apf_floor(ac_type: str) -> float:
-    """APF 及格线：壁挂式 >=5.0，立柜式 >=4.2（用户"核心参数速查"）。"""
-    return 4.2 if "柜" in (ac_type or "") else 5.0
+def tier_apf_floor(ac_type: str, hp: Any = None) -> float:
+    """APF 及格线（用户"核心参数速查"）：1.5匹挂机 >=5.0，3匹柜机 >=4.2。
+
+    大匹数挂机（2匹/3匹壁挂式，如 72GW）APF 天花板低（实测格力 72GW
+    APF=4.48），按柜机标准 >=4.2 判定——否则 2匹+ 挂机全部被误拒
+    （用户实测反馈：3匹挂机真实存在）。
+    """
+    if "柜" in (ac_type or ""):
+        return 4.2
+    hp_num = parse_hp(hp)
+    if hp_num is not None and hp_num > 1.5:
+        return 4.2  # 大匹数挂机按柜机标准
+    return 5.0
 
 
-def tier_apf_preferred(ac_type: str) -> float:
-    return 4.5 if "柜" in (ac_type or "") else 5.3
+def tier_apf_preferred(ac_type: str, hp: Any = None) -> float:
+    """APF 优选线：1.5匹挂机 >=5.3，3匹柜机 >=4.5；大匹数挂机 >=4.5。"""
+    if "柜" in (ac_type or ""):
+        return 4.5
+    hp_num = parse_hp(hp)
+    if hp_num is not None and hp_num > 1.5:
+        return 4.5
+    return 5.3
 
 
 def check_publication(item: dict[str, Any]) -> tuple[bool, list[str]]:
@@ -212,7 +228,7 @@ def check_publication(item: dict[str, Any]) -> tuple[bool, list[str]]:
     if apf is None:
         reasons.append("apf 未知（fail closed）")
     else:
-        floor = tier_apf_floor(ac_type)
+        floor = tier_apf_floor(ac_type, item.get("hp"))
         if apf < floor:
             reasons.append(f"apf={apf} < 及格线 {floor}")
     # 节流装置/铜管排数非硬门槛，但必须带字段（unknown 允许，前端标注）

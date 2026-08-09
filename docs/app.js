@@ -1,20 +1,28 @@
-/* 空调选购数据库 SPA 逻辑：筛选/排序/多源优先 */
+/* 空调选购数据库 SPA 逻辑：多级排序（Excel 风格）/筛选/多源优先 */
 "use strict";
 
 const DATA_URL = "data/latest.json";
+const MAX_SORT_LEVELS = 4;
+
 const SORT_FIELDS = [
   { key: "source_count", label: "数据来源数（多源优先）" },
   { key: "apf", label: "APF 能效比" },
   { key: "air_flow", label: "循环风量" },
+  { key: "cooling_capacity", label: "制冷量" },
+  { key: "heating_capacity", label: "制热量" },
+  { key: "cooling_power", label: "制冷功率" },
+  { key: "heating_power", label: "制热功率" },
   { key: "indoor_noise_max", label: "内机噪音（低优先）" },
+  { key: "outdoor_noise", label: "外机噪音（低优先）" },
   { key: "price", label: "价格" },
+  { key: "launch_date", label: "上市时间" },
 ];
 
 let rows = [];
 let filters = {};       // key -> Set(active values)
 let required = {};      // key -> required value
-let sortKey = "source_count";
-let sortDir = "desc";
+let numericRanges = {}; // key -> {min?, max?}  (Excel 风格数值范围筛选)
+let sortLevels = [];    // [{key, dir}] 多级排序，最多 4 级
 const defaultSort = { key: "source_count", dir: "desc" };
 
 const NOISE_RE = /([\d.]+)\s*dB/i;
@@ -33,6 +41,35 @@ function noiseMax(item) {
   return Math.max(...parts.map(Number));
 }
 
+/* 按排序级别取数值；launch_date('2025-03') 转可比较数 */
+function levelValue(item, key) {
+  if (key === "indoor_noise_max") return noiseMax(item);
+  if (key === "launch_date") {
+    const m = String(item.launch_date || "").match(/(\d{4})(?:-(\d{2}))?/);
+    return m ? (m[1] + (m[2] || "00")) * 1 : null;
+  }
+  return numValue(item, key);
+}
+
+/* Excel 风格多级排序：按 sortLevels 依次比较，前级相同才比后级 */
+function compareRows(a, b) {
+  const aCount = numValue(a, "source_count") || 0;
+  const bCount = numValue(b, "source_count") || 0;
+  // 隐式多源优先：默认任何排序下多源在前；仅当第一级显式为 source_count 时尊重方向
+  const firstIsSourceCount = sortLevels.length > 0 && sortLevels[0].key === "source_count";
+  if (!firstIsSourceCount && bCount !== aCount) return bCount - aCount;
+  for (const level of sortLevels) {
+    const av = levelValue(a, level.key);
+    const bv = levelValue(b, level.key);
+    if (av === null && bv === null) continue;
+    if (av === null) return level.dir === "desc" ? 1 : -1; // 空值排最后
+    if (bv === null) return level.dir === "desc" ? -1 : 1;
+    const cmp = av - bv;
+    if (cmp !== 0) return level.dir === "desc" ? -cmp : cmp;
+  }
+  return String(a.identity_key || "").localeCompare(String(b.identity_key || ""));
+}
+
 function applyFilters() {
   return rows.filter((item) => {
     for (const [key, values] of Object.entries(filters)) {
@@ -49,31 +86,143 @@ function applyFilters() {
         return false;
       }
     }
+    // Excel 风格数值范围筛选
+    for (const [key, range] of Object.entries(numericRanges)) {
+      const v = key === "indoor_noise_max" ? noiseMax(item) : numValue(item, key);
+      if (v === null) return false; // 无值不满足范围
+      if (range.min !== undefined && range.min !== "" && v < Number(range.min)) return false;
+      if (range.max !== undefined && range.max !== "" && v > Number(range.max)) return false;
+    }
     return true;
   });
 }
 
-function compareRows(a, b) {
-  // 默认任何排序下多源在前（source_count 显式排序时尊重方向）
-  const aCount = numValue(a, "source_count") || 0;
-  const bCount = numValue(b, "source_count") || 0;
-  if (sortKey !== "source_count") {
-    if (bCount !== aCount) return bCount - aCount;
+/* ── UI 渲染 ─────────────────────────────────────────── */
+
+function renderSortLevels() {
+  const container = document.getElementById("sort-levels");
+  if (!container) return;
+  container.innerHTML = "";
+  sortLevels.forEach((level, idx) => {
+    const row = document.createElement("div");
+    row.className = "sort-level";
+    const order = document.createElement("span");
+    order.className = "sort-level-order";
+    order.textContent = "关键字 " + (idx + 1);
+    const fieldSel = document.createElement("select");
+    SORT_FIELDS.forEach((f) => {
+      const opt = document.createElement("option");
+      opt.value = f.key;
+      opt.textContent = f.label;
+      if (f.key === level.key) opt.selected = true;
+      fieldSel.appendChild(opt);
+    });
+    fieldSel.addEventListener("change", () => {
+      sortLevels[idx].key = fieldSel.value;
+      renderTable();
+    });
+    const dirSel = document.createElement("select");
+    ["desc", "asc"].forEach((d) => {
+      const opt = document.createElement("option");
+      opt.value = d;
+      opt.textContent = d === "desc" ? "降序" : "升序";
+      if (d === level.dir) opt.selected = true;
+      dirSel.appendChild(opt);
+    });
+    dirSel.addEventListener("change", () => {
+      sortLevels[idx].dir = dirSel.value;
+      renderTable();
+    });
+    const removeBtn = document.createElement("button");
+    removeBtn.className = "sort-level-remove";
+    removeBtn.textContent = "×";
+    removeBtn.addEventListener("click", () => {
+      sortLevels.splice(idx, 1);
+      renderSortLevels();
+      renderTable();
+    });
+    row.appendChild(order);
+    row.appendChild(fieldSel);
+    row.appendChild(dirSel);
+    row.appendChild(removeBtn);
+    container.appendChild(row);
+  });
+  const addBtn = document.getElementById("add-sort-level");
+  if (addBtn) addBtn.style.display = sortLevels.length >= MAX_SORT_LEVELS ? "none" : "inline-block";
+}
+
+function addSortLevel() {
+  if (sortLevels.length >= MAX_SORT_LEVELS) return;
+  // 下一级默认选未使用的字段
+  const used = new Set(sortLevels.map((l) => l.key));
+  const next = SORT_FIELDS.find((f) => !used.has(f.key)) || SORT_FIELDS[0];
+  sortLevels.push({ key: next.key, dir: "desc" });
+  renderSortLevels();
+  renderTable();
+}
+
+function renderNumericRanges() {
+  const container = document.getElementById("numeric-ranges");
+  if (!container) return;
+  container.innerHTML = "";
+  const rangeDefs = [
+    { key: "apf", label: "APF", min: true, max: false, placeholder: "≥" },
+    { key: "air_flow", label: "循环风量", min: true, max: false, placeholder: "≥" },
+    { key: "indoor_noise_max", label: "内机噪音", min: false, max: true, placeholder: "≤" },
+    { key: "outdoor_noise", label: "外机噪音", min: false, max: true, placeholder: "≤" },
+    { key: "price", label: "价格(¥)", min: true, max: true, placeholder: "" },
+    { key: "cooling_capacity", label: "制冷量", min: true, max: false, placeholder: "≥" },
+  ];
+  for (const def of rangeDefs) {
+    const group = document.createElement("div");
+    group.className = "filter-group range-group";
+    const label = document.createElement("label");
+    label.textContent = def.label;
+    group.appendChild(label);
+    const opts = document.createElement("div");
+    opts.className = "options";
+    const range = numericRanges[def.key] || (numericRanges[def.key] = {});
+    if (def.min) {
+      const input = document.createElement("input");
+      input.type = "number";
+      input.className = "range-input";
+      input.placeholder = (def.placeholder || "") + "最小值";
+      input.value = range.min !== undefined ? range.min : "";
+      input.addEventListener("input", () => {
+        range.min = input.value;
+        renderTable();
+      });
+      opts.appendChild(input);
+    }
+    if (def.max) {
+      const input = document.createElement("input");
+      input.type = "number";
+      input.className = "range-input";
+      input.placeholder = (def.placeholder || "") + "最大值";
+      input.value = range.max !== undefined ? range.max : "";
+      input.addEventListener("input", () => {
+        range.max = input.value;
+        renderTable();
+      });
+      opts.appendChild(input);
+    }
+    const clear = document.createElement("button");
+    clear.className = "range-clear";
+    clear.textContent = "清";
+    clear.addEventListener("click", () => {
+      numericRanges[def.key] = {};
+      renderNumericRanges();
+      renderTable();
+    });
+    opts.appendChild(clear);
+    group.appendChild(opts);
+    container.appendChild(group);
   }
-  let av = numValue(a, sortKey);
-  let bv = numValue(b, sortKey);
-  if (sortKey === "indoor_noise_max") {
-    av = noiseMax(a); bv = noiseMax(b);
-  }
-  if (av === null && bv === null) return String(a.identity_key || "").localeCompare(String(b.identity_key || ""));
-  if (av === null) return 1;   // 未知排最后
-  if (bv === null) return -1;
-  const cmp = av - bv;
-  return sortDir === "desc" ? -cmp : cmp;
 }
 
 function renderFilters() {
   const bar = document.getElementById("filter-bar");
+  if (!bar) return;
   bar.innerHTML = "";
   const groups = [
     { key: "brand", label: "品牌", multi: true },
@@ -118,30 +267,11 @@ function renderFilters() {
   }
 }
 
-function renderSort() {
-  const select = document.getElementById("sort-select");
-  select.innerHTML = "";
-  for (const field of SORT_FIELDS) {
-    const option = document.createElement("option");
-    option.value = field.key;
-    option.textContent = field.label;
-    if (field.key === sortKey) option.selected = true;
-    select.appendChild(option);
-  }
-  select.addEventListener("change", () => {
-    sortKey = select.value;
-    renderTable();
-  });
-  document.getElementById("sort-dir").addEventListener("change", (e) => {
-    sortDir = e.target.value;
-    renderTable();
-  });
-}
-
 function renderTable() {
   const filtered = applyFilters().sort(compareRows);
   const thead = document.getElementById("table-head");
   const tbody = document.getElementById("table-body");
+  if (!thead || !tbody) return;
   const columns = [
     { key: "title", label: "型号" },
     { key: "brand", label: "品牌" },
@@ -165,10 +295,13 @@ function renderTable() {
     th.addEventListener("click", () => {
       const key = th.dataset.key;
       if (key === "sources") return;
-      if (key === sortKey) sortDir = sortDir === "desc" ? "asc" : "desc";
-      else { sortKey = key; sortDir = "desc"; }
-      document.getElementById("sort-select").value = sortKey;
-      document.getElementById("sort-dir").value = sortDir;
+      // 点击表头：作为第一关键字（同 key 则翻转方向）
+      if (sortLevels.length > 0 && sortLevels[0].key === key) {
+        sortLevels[0].dir = sortLevels[0].dir === "desc" ? "asc" : "desc";
+      } else {
+        sortLevels = [{ key, dir: "desc" }];
+      }
+      renderSortLevels();
       renderTable();
     });
   });
@@ -199,11 +332,13 @@ function renderTable() {
       }).join("") + "</tr>";
     }).join("");
   }
-  document.getElementById("result-count").textContent = `${filtered.length} / ${rows.length} 款`;
+  const countEl = document.getElementById("result-count");
+  if (countEl) countEl.textContent = `${filtered.length} / ${rows.length} 款`;
 }
 
 function renderAll() {
   renderFilters();
+  renderNumericRanges();
   renderTable();
 }
 
@@ -213,12 +348,15 @@ fetch(DATA_URL)
     rows = Array.isArray(data.items) ? data.items : [];
     required = { inverter: true, ac_type: ["壁挂式", "立柜式"] };
     filters = { throttle_type: new Set(["电子膨胀阀"]) };
-    sortKey = defaultSort.key;
-    sortDir = defaultSort.dir;
-    renderSort();
+    numericRanges = {};
+    sortLevels = [{ key: defaultSort.key, dir: defaultSort.dir }];
+    const addBtn = document.getElementById("add-sort-level");
+    if (addBtn) addBtn.addEventListener("click", addSortLevel);
+    renderSortLevels();
     renderAll();
   })
   .catch((err) => {
-    document.getElementById("table-body").innerHTML =
+    const tbody = document.getElementById("table-body");
+    if (tbody) tbody.innerHTML =
       `<tr><td colspan="16" class="unknown">数据加载失败：${err.message}（部署工作流可能尚未生成数据）</td></tr>`;
   });

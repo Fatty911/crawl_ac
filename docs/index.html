@@ -15,14 +15,10 @@
 <main>
   <section class="controls">
     <div class="filter-bar" id="filter-bar"></div>
+    <div class="range-bar" id="numeric-ranges"></div>
     <div class="sort-bar">
-      <label>排序：</label>
-      <select id="sort-select"></select>
-      <label class="order-label">顺序：</label>
-      <select id="sort-dir">
-        <option value="desc">降序</option>
-        <option value="asc">升序</option>
-      </select>
+      <div class="sort-levels" id="sort-levels"></div>
+      <button id="add-sort-level" class="add-sort-btn">＋ 添加排序关键字</button>
       <span class="result-count" id="result-count"></span>
     </div>
   </section>

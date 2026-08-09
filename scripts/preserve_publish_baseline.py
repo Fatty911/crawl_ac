@@ -84,6 +84,14 @@ def preserve(candidate: dict[str, Any], baseline: dict[str, Any] | None,
         for item in candidate_items
     ]
     merged = [*candidate_items, *preserved]
+    # 值归并（P/匹、新一级能效/新一级、2排/双排）——含缓存/基线继承值
+    from merge_data import normalize_coil_rows, normalize_energy_grade, normalize_hp
+    for item in merged:
+        for field, normalizer in (("hp", normalize_hp),
+                                  ("energy_grade", normalize_energy_grade),
+                                  ("coil_rows", normalize_coil_rows)):
+            if item.get(field):
+                item[field] = normalizer(item[field])
     payload = {
         "schema_version": candidate.get("schema_version", "1.0"),
         "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),

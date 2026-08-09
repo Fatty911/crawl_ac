@@ -116,6 +116,49 @@ def parse_hp(value: Any) -> float | None:
     return None
 
 
+def _clean(value: Any) -> str:
+    return re.sub(r"\s+", " ", str(value or "")).strip()
+
+
+def normalize_hp(value: Any) -> str:
+    """归并匹数写法：'1.5P'->'1.5匹'、'3.0P'->'3匹'、'大1.0P'->'大1匹'。
+
+    保留大/小前缀（选购语义不同）；无法识别的返回原值。
+    """
+    text = _clean(value)
+    if not text:
+        return ""
+    prefix = ""
+    rest = text
+    for p in ("大", "小"):
+        if rest.startswith(p):
+            prefix = p
+            rest = rest[1:]
+            break
+    match = re.match(r"\s*(\d+(?:\.\d+)?)\s*[P匹]\s*$", rest)
+    if not match:
+        return text
+    number = float(match.group(1))
+    number_str = str(int(number)) if number == int(number) else str(number)
+    return f"{prefix}{number_str}匹"
+
+
+def normalize_energy_grade(value: Any) -> str:
+    """归并能效等级写法：'新一级能效'->'新一级'（用户归并要求）。"""
+    text = _clean(value)
+    if text == "新一级能效":
+        return "新一级"
+    return text
+
+
+def normalize_coil_rows(value: Any) -> str:
+    """归并铜管排数写法：'2排'/'两排'->'双排'。"""
+    text = _clean(value)
+    if text in ("2排", "两排", "2排管"):
+        return "双排"
+    return text
+
+
 def parse_apf(value: Any) -> float | None:
     if value is None or value == "":
         return None
@@ -207,6 +250,12 @@ def merge_group(identity: str, rows: list[dict[str, Any]]) -> dict[str, Any]:
     model = merged.get("model") or identity
     brand = merged.get("brand") or ""
     merged["title"] = f"{brand}{model}" if brand and not str(merged.get("title", "")).startswith(brand) else (merged.get("title") or f"{brand}{model}")
+    # 值归并（自发现自优化：P/匹、新一级能效/新一级、2排/双排）
+    for field, normalizer in (("hp", normalize_hp),
+                              ("energy_grade", normalize_energy_grade),
+                              ("coil_rows", normalize_coil_rows)):
+        if merged.get(field):
+            merged[field] = normalizer(merged[field])
     return merged
 
 

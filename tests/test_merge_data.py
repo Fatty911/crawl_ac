@@ -176,6 +176,54 @@ class TestPreserveInheritHardware:
         assert item["hardware_evidence_url"] == "https://example.com/e"
 
 
+
+
+class TestValueNormalization:
+    """自发现自优化：P/匹、新一级能效/新一级、2排/双排 归并。"""
+
+    def test_normalize_hp(self):
+        from merge_data import normalize_hp
+        assert normalize_hp("1.5P") == "1.5匹"
+        assert normalize_hp("1.5匹") == "1.5匹"
+        assert normalize_hp("3.0P") == "3匹"
+        assert normalize_hp("3P") == "3匹"
+        assert normalize_hp("2.0P") == "2匹"
+        assert normalize_hp("大1.0P") == "大1匹"
+        assert normalize_hp("大1匹") == "大1匹"
+        assert normalize_hp("大1.5P") == "大1.5匹"
+        assert normalize_hp("小1.5P") == "小1.5匹"
+        assert normalize_hp("1.0P") == "1匹"
+        assert normalize_hp("") == ""
+        # 无法识别保留原值
+        assert normalize_hp("变频") == "变频"
+
+    def test_normalize_energy_grade(self):
+        from merge_data import normalize_energy_grade
+        assert normalize_energy_grade("新一级能效") == "新一级"
+        assert normalize_energy_grade("新一级") == "新一级"
+        assert normalize_energy_grade("1级") == "1级"
+
+    def test_normalize_coil_rows(self):
+        from merge_data import normalize_coil_rows
+        assert normalize_coil_rows("2排") == "双排"
+        assert normalize_coil_rows("两排") == "双排"
+        assert normalize_coil_rows("双排") == "双排"
+        assert normalize_coil_rows("1.6排") == "1.6排"
+
+    def test_merge_group_applies_normalization(self):
+        from merge_data import merge_group
+        row = {
+            "identity_key": "kfr35gw/n8ha1iii-h", "model": "KFR-35GW/N8HA1III-H",
+            "brand": "华凌", "source": "PConline", "atomic_source_names": ["PConline"],
+            "source_product_id": "1", "source_url": "u", "source_rank": 1,
+            "hp": "1.5P", "energy_grade": "新一级能效", "coil_rows": "2排",
+        }
+        merged = merge_group("kfr35gw/n8ha1iii-h", [row])
+        assert merged["hp"] == "1.5匹"
+        assert merged["energy_grade"] == "新一级"
+        assert merged["coil_rows"] == "双排"
+
+
 class TestMergeGroup:
     def _row(self, source, pid, **fields):
         row = {

@@ -106,6 +106,55 @@ class TestPublicationGate:
         assert item["coil_rows"] == "未知"
 
 
+
+
+class TestPreserveInheritHardware:
+    """新爬取版本不得覆盖 baseline 已提取的硬件参数。"""
+
+    def test_inherit_throttle_from_baseline(self):
+        from preserve_publish_baseline import preserve
+        candidate = {"items": [
+            {"identity_key": "kfr35gw/n8ha1iii-h", "brand": "华凌",
+             "model": "KFR-35GW/N8HA1III-H", "ac_type": "壁挂式", "inverter": True,
+             "apf": 5.3, "throttle_type": "未知", "coil_rows": "未知",
+             "atomic_source_names": ["PConline"], "source_count": 1,
+             "source_urls": ["u"], "source_ranks": []},
+        ]}
+        baseline = {"items": [
+            {"identity_key": "kfr35gw/n8ha1iii-h", "brand": "华凌",
+             "model": "KFR-35GW/N8HA1III-H", "ac_type": "壁挂式", "inverter": True,
+             "apf": 5.3, "throttle_type": "电子膨胀阀", "coil_rows": "双排",
+             "hardware_evidence_url": "https://example.com/e",
+             "atomic_source_names": ["PConline"], "source_count": 1,
+             "source_urls": ["u"], "source_ranks": []},
+        ]}
+        result = preserve(candidate, baseline)
+        item = result["items"][0]
+        assert item["throttle_type"] == "电子膨胀阀", "应继承 throttle_type"
+        assert item["coil_rows"] == "双排", "应继承 coil_rows"
+        assert item["hardware_evidence_url"] == "https://example.com/e"
+
+    def test_no_inherit_when_candidate_has_value(self):
+        from preserve_publish_baseline import preserve
+        candidate = {"items": [
+            {"identity_key": "kfr35gw/x", "brand": "华凌", "model": "KFR-35GW/X",
+             "ac_type": "壁挂式", "inverter": True, "apf": 5.3,
+             "throttle_type": "毛细管", "coil_rows": "单排",
+             "atomic_source_names": ["PConline"], "source_count": 1,
+             "source_urls": ["u"], "source_ranks": []},
+        ]}
+        baseline = {"items": [
+            {"identity_key": "kfr35gw/x", "brand": "华凌", "model": "KFR-35GW/X",
+             "ac_type": "壁挂式", "inverter": True, "apf": 5.3,
+             "throttle_type": "电子膨胀阀", "coil_rows": "双排",
+             "atomic_source_names": ["PConline"], "source_count": 1,
+             "source_urls": ["u"], "source_ranks": []},
+        ]}
+        result = preserve(candidate, baseline)
+        item = result["items"][0]
+        assert item["throttle_type"] == "毛细管", "candidate 有值时不覆盖"
+
+
 class TestMergeGroup:
     def _row(self, source, pid, **fields):
         row = {

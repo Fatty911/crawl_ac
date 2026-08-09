@@ -15,6 +15,25 @@ except ModuleNotFoundError:
     from merge_data import check_publication
 
 
+def _inherit_hardware_fields(item: dict[str, Any], baseline_by_id: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    """Candidate 版本缺失硬件参数时，从 baseline 同 identity 继承。
+
+    merge 会用新爬取版本覆盖旧发布版本，旧版本上 AI 提取的
+    throttle_type/coil_rows/hardware_evidence_url 会丢失。这里在发布前
+    把 baseline 已知而 candidate 未知的硬件字段补回。
+    """
+    baseline_item = baseline_by_id.get(item.get("identity_key"))
+    if not baseline_item:
+        return item
+    for field in ("throttle_type", "coil_rows", "hardware_evidence_url"):
+        current = item.get(field)
+        if current in (None, "", "未知"):
+            inherited = baseline_item.get(field)
+            if inherited not in (None, "", "未知"):
+                item[field] = inherited
+    return item
+
+
 def preserve(candidate: dict[str, Any], baseline: dict[str, Any] | None) -> dict[str, Any]:
     candidate_items = candidate.get("items", [])
     baseline_items = (baseline or {}).get("items", [])
@@ -23,6 +42,11 @@ def preserve(candidate: dict[str, Any], baseline: dict[str, Any] | None) -> dict
     preserved = [
         item for item in eligible_baseline
         if item.get("identity_key") not in candidate_ids
+    ]
+    baseline_by_id = {item.get("identity_key"): item for item in eligible_baseline}
+    # 继承：candidate 新版本补回 baseline 的硬件参数
+    candidate_items = [
+        _inherit_hardware_fields(dict(item), baseline_by_id) for item in candidate_items
     ]
     merged = [*candidate_items, *preserved]
     payload = {

@@ -133,10 +133,9 @@
   "answer_excerpt": "铜管排数: 单排\n节流装置: 毛细管\n来源: https://www.zhihu.com/question/570784473/answer/2799051157\n备注: 根据数码家电评测实机拆解文章确认，该机型冷凝器为单排铜管，且节流装置未采用电子膨胀阀而使用毛细管。"
  },
  "kfr72lw/j200-1": {
-  "throttle_type": "电子膨胀阀",
-  "evidence_url": "https://www.haier.com/jiadian/202304/zh-CN-JiadianKongTiao-2590908.html",
+  "note": "no positive evidence in answer",
   "final": false,
-  "answer_excerpt": "铜管排数: 未知\n节流装置: 电子膨胀阀\n来源: https://www.haier.com/jiadian/202304/zh-CN-JiadianKongTiao-2590908.html\n备注: 厂商官方商品详情页明确标注了节流装置为电子膨胀阀，但未公布外机换热器铜管具体排数，且各大拆机评测平台也未能查到该机型的拆机数据，故记为未知。"
+  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: 无\n备注: 经联网检索，由于“京筠”系列（KFR-72LW/J200-1）多为特定渠道机型，线上缺乏相关拆机评测与官方详情页，无法提供确切来源，且已知信息中“1.5匹”通常对应3500W制冷量，而该型号为7325W制冷量（实为3匹），原信息存在矛盾，未作猜测。"
  },
  "kfr72lw/e3-1": {
   "coil_rows": "双排",
@@ -146,9 +145,9 @@
   "answer_excerpt": "铜管排数: 双排\n节流装置: 电子膨胀阀\n来源: https://zhuanlan.zhihu.com/p/666234912\n备注: 基于海尔洗空气系列3匹柜机的专业拆机评测确认外机为双排铜管且带有电子膨胀阀，但各类公开资料未能针对性核实字母“E3”这一特定尾缀的配置差异。"
  },
  "kfr50lw/e1-1": {
-  "evidence_url": "https://www.haier.com/air_conditioners/",
+  "note": "no positive evidence in answer",
   "final": false,
-  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: https://www.haier.com/air_conditioners/\n备注: 经多方检索，该老型号（KFR-50LW/E1-1）的商品页及参数表已下线，亦无相关拆机评测，核心硬件用料无法查证，不做猜测。"
+  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: 未知\n备注: 经全網检索，未找到海尔KFR-50LW/E1-1的具体拆机评测或厂商详细用料参数，无法确认其铜管排数与节流装置类型，不作猜测。"
  },
  "kfr35gw/a100-1": {
   "coil_rows": "双排",
@@ -165,9 +164,9 @@
   "answer_excerpt": "铜管排数: 双排\n节流装置: 电子膨胀阀\n来源: https://www.zhihu.com/question/485211848\n备注: 经查证相关空调拆机与选购科普文章，海尔A200系列3匹柜机外机采用双排冷凝器铜管及电子膨胀阀节流。"
  },
  "kfr72lw/e1-1": {
-  "evidence_url": "https://www.haier.com",
+  "evidence_url": "https://www.haier.com/air_conditioners/",
   "final": false,
-  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: https://www.haier.com\n备注: 经联网检索，未找到该老型号（E1-1）的明确拆机评测或官方详细物料清单，缺乏相关公开来源，不猜测。"
+  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: https://www.haier.com/air_conditioners/\n备注: 经检索，该型号为较老的“净省电”系列机型，因年代久远且无主流数码平台拆机评测记录，厂商页及评测均未提供确切换热器排数与节流装置参数，按要求标注未知。"
  },
  "kfr26gw/j200-1": {
   "coil_rows": "1.6排",
@@ -184,9 +183,11 @@
   "answer_excerpt": "铜管排数: 双排\n节流装置: 电子膨胀阀\n来源: https://www.zhihu.com/tardis/bma/ftopic/447923191 https://www.jd.com/product/100049818677.html\n备注: 该机型为海尔“洗空气”系列1.5匹新一级能效挂机，搭载三菱电机压缩机及双排冷凝器与电子膨胀阀，用料扎实，以上信息综合自家电拆机评测库及官方电商详情页。"
  },
  "kfr35gw/e2-1": {
-  "note": "no positive evidence in answer",
-  "final": false,
-  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: 无有效来源\n备注: 经全网检索，未找到“海尔 KFR-35GW/E2-1”的具体拆机评测或厂商详尽用料参数，无法证实其铜管排数与节流装置类型，拒绝猜测。"
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://zhuanlan.zhihu.com/p/633756712",
+  "final": true,
+  "answer_excerpt": "铜管排数: 双排\n节流装置: 电子膨胀阀\n来源: https://zhuanlan.zhihu.com/p/633756712\n备注: 经查证，海尔麦浪舒适风系列1.5匹一级能效机型内外机配置扎实，外机采用双排铜管冷凝器与电子膨胀阀。"
  },
  "kfr72lw/e30au": {
   "coil_rows": "双排",
@@ -210,9 +211,11 @@
   "answer_excerpt": "铜管排数: 1.6排\n节流装置: 电子膨胀阀\n来源: https://zhuanlan.zhihu.com/p/688921348\n备注: 经查证，净省电二代Pro系列1.5匹机型采用1.6排冷凝器与电子膨胀阀，详细用料数据见该系列拆机评测文章。"
  },
  "kfr35gw/exa": {
-  "note": "no positive evidence in answer",
-  "final": false,
-  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: 无\n备注: 经联网检索，未找到针对海尔KFR-35GW/EXA（京馨II代）相关型号的专业拆机评测或明确标注硬件用料指标的厂商参数页，无法确切查证其铜管排数与节流装置类型，不予猜测。"
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://zhuanlan.zhihu.com/p/630206676",
+  "final": true,
+  "answer_excerpt": "铜管排数: 双排\n节流装置: 电子膨胀阀\n来源: https://zhuanlan.zhihu.com/p/630206676\n备注: 经查证，ce系列（含KFR-35GW/EXA）在多次硬件拆机评测中均确认为双排铜管换热器且带有电子膨胀阀。"
  },
  "kfr26gw/e1-1s": {
   "coil_rows": "1.6排",
@@ -229,14 +232,14 @@
   "answer_excerpt": "铜管排数: 双排\n节流装置: 电子膨胀阀\n来源: [电商商品页参数/拆机评测汇总参考](https://detail.zol.com.cn/371/370256/param.shtml) / [中关村在线产品库](https://detail.zol.com.cn/371/370256.shtml)\n备注: 经联网检索，海尔该型号属于1.5匹新一级能效机型，行业同规格标准用料及.genre thi"
  },
  "kfr26gw/e1-1": {
-  "note": "no positive evidence in answer",
+  "evidence_url": "https://www.haier.com",
   "final": false,
-  "answer_excerpt": "通过联网检索，未能找到针对“海尔 KFR-26GW/E1-1”这一具体型号的专业拆机评测报告或包含内部硬件用料详情的商品/厂商页面。现有公开信息仅限于基础制冷量和类型等表层参数，未公开其换热器铜管排数和节流装置类型。\n\n铜管排数: 未知\n节流装置: 未知\n来源: 无有效来源URL\n备注: 检索全网未发现该特定型号的拆机评测或深度用料说明，无法核实其内部硬件规格，绝不猜测。"
+  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: https://www.haier.com\n备注: 该型号（KFR-26GW/E1-1）多为多年前的老旧机型，当前主流评测库及厂商官网已无该机型参数页与拆机记录，无法联网查证其具体硬件用料，拒绝猜测。"
  },
  "kfr72gw/e1-1": {
-  "evidence_url": "https://www.haier.com/air_conditioners/",
+  "evidence_url": "https://www.haier.com/air_conditioners/2204091341439551.html",
   "final": false,
-  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: https://www.haier.com/air_conditioners/\n备注: 经联网检索，各大拆机评测论坛及海尔官方资料库中均未公开“KFR-72GW/E1-1”具体型号的拆机用料与节流装置详情，无法提供确切来源，故标记为未知不作猜测。"
+  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: https://www.haier.com/air_conditioners/2204091341439551.html\n备注: 经核查，该型号为挂机（型号后缀GW表示壁挂式，与已知信息中立柜式相悖），原厂商品详情页未提供换热器排数及节流装置的具体硬件明细，且全网无该特定型号的拆机评测，故标为未知。"
  },
  "kfr72lw/et-1": {
   "coil_rows": "双排",
@@ -316,14 +319,18 @@
   "answer_excerpt": "铜管排数: 双排\n节流装置: 电子膨胀阀\n来源: https://www.zhihu.com/zvideo/1550410707097751552 （注：TCL京翼系列各1.5匹新款多采用相同底盘，拆机均确认为双排铜管+电子膨胀阀。由于搜索接口限制未能直接抓取该URL网页正文，此结论基于全网拆机评测常识与该型号同系标准配置。如需完全字面对应的网页，请查阅太平洋电脑网或中关村在线的TCL京翼拆机评测"
  },
  "kfr72gw/rp1ga": {
-  "evidence_url": "https://www.tcl.com/",
-  "final": false,
-  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: https://www.tcl.com/\n备注: 经全网检索，未能找到“KFR-72GW/RP1Ga+B1”该具体型号的拆机评测或详细厂商规格书，无法确证其硬件用料，且需注意您已知信息中标注的“立柜式”与型号中的“72GW（分体挂壁式）”存在冲突，故不作猜测。"
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://htx.net/flarticle/6793811150.shtml，https://www.tcl.com/",
+  "final": true,
+  "answer_excerpt": "铜管排数: 双排\n节流装置: 电子膨胀阀\n来源: https://htx.net/flarticle/6793811150.shtml，https://www.tcl.com/\n备注: 经联网核实，该型号为TCL小金条3匹新一级变频空调；评测拆机显示其采用双排冷凝器且配备电子膨胀阀，厂商说明因批次差异硬件可能有微调，建议以实机为准。"
  },
  "kfr35gw/cp21": {
-  "note": "no positive evidence in answer",
-  "final": false,
-  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: 无有效来源\n备注: 经联网检索各大数码拆机评测社区及电商详情页，未能找到针对该具体型号（CP21+B1）的拆机评测和硬件用料权威数据，根据要求不进行系列推测。"
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://www.zhihu.com/zvideo/1634267519540568064",
+  "final": true,
+  "answer_excerpt": "铜管排数: 双排\n节流装置: 电子膨胀阀\n来源: https://www.zhihu.com/zvideo/1634267519540568064 , https://item.jd.com/100048899418.html\n备注: 经查证，TCL 小蓝翼系列（含P6及后续升级款）1.5匹新一级能效机型在拆机评测中均显示外机采用双排铜管换热器及电子膨胀阀。请核对具体批次，早期同型号可能存在用一代"
  },
  "kfr72lw/jd21": {
   "coil_rows": "双排",
@@ -534,9 +541,11 @@
   "answer_excerpt": "铜管排数: 2排\n节流装置: 电子膨胀阀\n来源: https://www.zhihu.com/p/586904478\n备注: 该评测详细拆解了美的N8WF1（云朵）3匹柜机，确认其冷凝器为双排铜管且配备电子膨胀阀。"
  },
  "kfr72lw/mj2": {
-  "note": "no positive evidence in answer",
-  "final": false,
-  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: 未知\n备注: 经多方检索未找到美的KFR-72LW/MJ2（京绽系列）的拆机评测或官方详细硬件用料数据，无法确认其外机换热器铜管排数及节流装置类型，不作猜测。"
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://jd.com/product/100044687022.html",
+  "final": true,
+  "answer_excerpt": "铜管排数: 双排\n节流装置: 电子膨胀阀\n来源: https://jd.com/product/100044687022.html , https://zhuanlan.zhihu.com/p/543210987\n备注: “京绽”系列3匹机型的厂商详情页标注外机为双排铜管；知乎相关拆机评测确认其冷凝器为双排且配备电子膨胀阀。"
  },
  "kfr35gw/jy1": {
   "coil_rows": "1.6排",
@@ -637,9 +646,9 @@
   "answer_excerpt": "铜管排数: 1.6排\n节流装置: 电子膨胀阀\n来源: https://zhuanlan.zhihu.com/p/689225215\n备注: 评测文章明确拆机显示美的风尊三代1.5匹外机采用1.6排冷凝器铜管及电子膨胀阀。"
  },
  "kfr72lw/hwr3": {
-  "evidence_url": "https://www.midea.cn/product/detail/478221.html",
+  "note": "no positive evidence in answer",
   "final": false,
-  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: https://www.midea.cn/product/detail/478221.html\n备注: 经查证，美的官方及主流电商详情页与拆机评测库中均无“KFR-72LW/HWR3”早期机型的公开拆机数据，基于不得猜测的原则标注为未知。"
+  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: 无\n备注: 经多方检索，未能找到针对“美的 KFR-72LW/HWR3”这一具体子型号的拆机评测记录或官方公开其核心部件（铜管排数、节流装置）详细参数的页面，根据要求不进行猜测。"
  },
  "kfr72lw/m5": {
   "coil_rows": "1.6排",
@@ -698,9 +707,11 @@
   "answer_excerpt": "铜管排数: 双排\n节流装置: 电子膨胀阀\n来源: https://www.zhihu.com/zvideo/1660580000000000000\n备注: 基于TCL“真省电Pro”系列3匹新一级能效柜机的拆机评测，该机冷凝器采用双排铜管设计，节流装置为电子膨胀阀。"
  },
  "kfr72lw/jd7": {
-  "evidence_url": "https://www.tcl.com",
-  "final": false,
-  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: https://www.tcl.com\n备注: 经全面检索公开的家电拆机评测库、厂商官网及电商详情页，均未找到针对TCL KFR-72LW/JD7+B1（京柔系列）该具体型号的换热器排数与节流装置拆机数据，遵循不猜测原则记为未知。"
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://zhuanlan.zhihu.com/p/641707896",
+  "final": true,
+  "answer_excerpt": "铜管排数: 双排\n节流装置: 电子膨胀阀\n来源: https://zhuanlan.zhihu.com/p/641707896\n备注: 经查证，该型号为TCL京柔3匹新一级能效柜机，知乎相关拆机评测显示其外机采用双排铜管冷凝器及电子膨胀阀作为节流装置。"
  },
  "kfr72lw/yp7ca": {
   "coil_rows": "双排",
@@ -733,12 +744,14 @@
  "kfr35gw/cp11": {
   "evidence_url": "https://www.tcl.com",
   "final": false,
-  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: https://www.tcl.com\n备注: 经检索，TCL KFR-35GW/CP11+B1（深睡大师系列）属于早年或非主流热销型号，网络上缺乏专业拆机评测记录，且现行电商详情页及厂商参数表均未披露该型号的冷凝器排数与节流装置类型，故依据“不猜测”原则标记为未知。"
+  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: https://www.tcl.com\n备注: 在TCL官方线上渠道及全网家电拆机评测库中均未检索到“CP11”这一冷门子型号的外机冷凝器排数与节流装置具体用料明细，缺乏拆机实测数据支撑，遵循不猜测原则视为未知。"
  },
  "kfr35gw/gad32": {
-  "evidence_url": "https://www.tcl.com",
-  "final": false,
-  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: https://www.tcl.com\n备注: 经过检索，未能找到针对TCL KFR-35GW/GAD32+B1该老型号的专业拆机评测或包含硬件细节数据的商品页，厂商官网也无此规格明细，故如实标记为未知。"
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://www.zhihu.com/zvideo/1484565462957309952",
+  "final": true,
+  "answer_excerpt": "铜管排数: 双排\n节流装置: 电子膨胀阀\n来源: https://www.zhihu.com/zvideo/1484565462957309952\n备注: 上述信息来源为TCL同系列（如智锦/C12等同期1.5匹新一级能效机型的拆机评测），该系列外机均采用双排铜管与电子膨胀阀；因未找到GAD32+B1机型的专属拆机，若该型号为同系列马甲机则适用，否则请以实物为准。"
  },
  "kfr35gw/yq7ec": {
   "coil_rows": "1.6排",
@@ -746,5 +759,369 @@
   "evidence_url": "https://www.zhihu.com/question/646342690/answer/3514146310",
   "final": true,
   "answer_excerpt": "铜管排数: 1.6排\n节流装置: 电子膨胀阀\n来源: https://www.zhihu.com/question/646342690/answer/3514146310 , https://www.smzdm.com/p/114492844/\n备注: 多篇针对TCL“真省电”系列（小金条Q7E）的拆机评测显示，该款空调外机采用1.6排铜管换热器及电子膨胀阀（部分评测也提及该系列同型号常有替代毛细"
+ },
+ "kfr72lw/yc7ca": {
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://www.zhihu.com/question/596389743/answer/3104480893",
+  "final": true,
+  "answer_excerpt": "铜管排数: 双排\n节流装置: 电子膨胀阀\n来源: https://www.zhihu.com/question/596389743/answer/3104480893 (基于TCL小蓝翼C7系列3匹新一级拆机评测与配置汇总)\n备注: 经查证，TCL小蓝翼C7系列3匹新一级能效机型内外机用料扎实，室外机冷凝器采用双排铜管设计并配备了电子膨胀阀以保证精准控温。"
+ },
+ "kfr80lw/rq2ea": {
+  "evidence_url": "https://www.tcl.com",
+  "final": false,
+  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: https://www.tcl.com 未能从第三方评测或公开详细规格表中查证到该小众定制机型的拆机信息。\n备注: 经全网检索，未发现针对“TCL KFR-80LW/RQ2Ea+B1”的拆机评测或包含换热器和节流装置细节的厂商参数表，基于不猜测原则记为未知。"
+ },
+ "kfr26gw/yq7ec": {
+  "coil_rows": "单排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://www.bilibili.com/video/BV1kN4y1Y7Kj/",
+  "final": true,
+  "answer_excerpt": "铜管排数: 单排\n节流装置: 毛细管\n来源: https://www.bilibili.com/video/BV1kN4y1Y7Kj/\n备注: 经查证TCL“真省电”系列（含大1匹YQ7Ec型号）拆机评测，外机采用单排铜管冷凝器，且未配备电子膨胀阀，节流采用毛细管。"
+ },
+ "kfr26gw/rt2eb": {
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://zhuanlan.zhihu.com/p/686321115",
+  "final": true,
+  "answer_excerpt": "铜管排数: 未知\n节流装置: 电子膨胀阀\n来源: [1] https://zhuanlan.zhihu.com/p/686321115 [2] https://www.smzdm.com/p/115632344/\n备注: 经核查TCL真省电Pro系列机型拆机评测，节流装置均明确为电子膨胀阀；但大1匹（26GW）小匹数机型未查到具体拆机实测记录，该系列1.5匹为双排铜管，考虑到厂商可能按匹数缩减用料"
+ },
+ "kfr51lw/rt2ea": {
+  "evidence_url": "https://www.tcl.com",
+  "final": false,
+  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: https://www.tcl.com\n备注: 无法通过网络实时查证到该具体型号的第三方拆机评测报告或官方 detail 拆解数据，为避免猜测，两项硬件用料均标记为未知。"
+ },
+ "kfr51lw/rt7ga": {
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://www.zhihu.com/question/645548898/answer/3507617388",
+  "final": true,
+  "answer_excerpt": "铜管排数: 双排\n节流装置: 电子膨胀阀\n来源: https://www.zhihu.com/question/645548898/answer/3507617388\n备注: 经检索，该型号（TCL小金聆2匹新一级）的具体拆机评测信息较少，以上硬件用料参考知乎相近配置讨论及同系列拆机评测，具体请以实物为准。"
+ },
+ "kfr35gw/yp1ca": {
+  "coil_rows": "单排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://zhuanlan.zhihu.com/p/586862108",
+  "final": true,
+  "answer_excerpt": "铜管排数: 单排\n节流装置: 毛细管\n来源: https://zhuanlan.zhihu.com/p/586862108\n备注: 经查证，TCL小蓝翼II青春版（YP1Ca）系列1.5匹机型采用单排换热器与毛细管节流，未配备电子膨胀阀及双排冷凝器。"
+ },
+ "kfr35gw/rt7ga": {
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://www.zhihu.com/question/655954639",
+  "final": true,
+  "answer_excerpt": "铜管排数: 双排\n节流装置: 电子膨胀阀\n来源: https://www.zhihu.com/question/655954639\n备注: 经查证，TCL小金聆RT7Ga系列1.5P新一级能效机型采用双排铜管冷凝器及电子膨胀阀（注：因品牌同系列硬件可能随批次微调，此来源基于该系列主流拆机评测与配置数据得出）。"
+ },
+ "kfr35gw/yq7ga": {
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://www.bilibili.com/video/BV1xG411r7LA",
+  "final": true,
+  "answer_excerpt": "铜管排数: 双排\n节流装置: 电子膨胀阀\n来源: https://www.bilibili.com/video/BV1xG411r7LA\n备注: 经查证该型号为TCL小蓝翼Q7系列拆机评测，外机采用双排铜管换热器且配备电子膨胀阀。"
+ },
+ "kfr72lw/rt2ea": {
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://www.zhihu.com/zvideo/1669624340516855808",
+  "final": true,
+  "answer_excerpt": "铜管排数: 双排\n节流装置: 电子膨胀阀\n来源: https://www.zhihu.com/zvideo/1669624340516855808\n备注: 综合数码家电博主拆机评测与电商详情页信息，该型号采用双排铜管冷凝器及电子膨胀阀节流。"
+ },
+ "kfr33gw/qj1-x1": {
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://www.zhihu.com/p/633728977",
+  "final": true,
+  "answer_excerpt": "铜管排数: 双排\n节流装置: 电子膨胀阀\n来源: https://www.zhihu.com/p/633728977\n备注: 经查，该机型属于科龙QJ1系列（1.5匹新一级能效），根据相关拆机评测资料，其外机采用双排冷凝器铜管及电子膨胀阀作为节流装置。"
+ },
+ "kfr35gw/qs1lite-x1": {
+  "note": "no positive evidence in answer",
+  "final": false,
+  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: 无法查证（未能找到确切的来源 URL）\n备注: 搜狗联网搜索未能获取到该特定型号的拆机评测或商品页链接，无法核实硬件用料，根据要求不进行猜测。"
+ },
+ "kfr72lw/qs1max-x1": {
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://www.zhihu.com/p/652188918",
+  "final": true,
+  "answer_excerpt": "铜管排数: 双排\n节流装置: 电子膨胀阀\n来源: https://www.zhihu.com/p/652188918\n备注: 经查证多篇科龙QS1-X1（及同系列升级款QS1Max）的拆机评测，该机型外机采用双排铜管冷凝器，节流装置为电子膨胀阀。"
+ },
+ "kfr26gw/qs1lite-x1": {
+  "note": "no positive evidence in answer",
+  "final": false,
+  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: 无\n备注: 经检索未能在评测文章、商品页或厂商页找到科龙 KFR-26GW/QS1Lite-X1 关于此两项硬件的具体拆机资料，根据要求不作猜测。"
+ },
+ "kfr35gw/lz2-x1": {
+  "evidence_url": "https://www.kelon.com/service_support/washing_machine/",
+  "final": false,
+  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: https://www.kelon.com/service_support/washing_machine/\n备注: 经联网检索，未能找到科龙KFR-35GW/LZ2-X1的拆机评测或包含该两项硬件细节的厂商参数表，故按照要求标记为未知，不作猜测。"
+ },
+ "kfr35gw/qg1-x1": {
+  "evidence_url": "https://www.kelon.com/",
+  "final": false,
+  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: https://www.kelon.com/\n备注: 经广泛检索，未能找到针对“科龙KFR-35GW/QG1-X1”这一具体型号的专业拆机评测或明确标注内部硬件用料的官方参数表，根据要求不做猜测。"
+ },
+ "kfr50lw/qs1-x1": {
+  "evidence_url": "https://search.bilibili.com/all?keyword=科龙KFR-50LWQS1-X1拆机",
+  "final": false,
+  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: https://search.bilibili.com/all?keyword=科龙KFR-50LWQS1-X1拆机\n备注: 经全网检索，未发现任何针对该具体型号的拆机评测、官方详细硬件规格表或电商页明确标示其内外机换热器排数及节流装置用料，且无法通过公开资料交叉验证，故严格判定为未知。"
+ },
+ "kfr72lw/qs1ultra-x1": {
+  "coil_rows": "1.6排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://www.zhihu.com/question/633082269/answer/3482761024",
+  "final": true,
+  "answer_excerpt": "铜管排数: 2排+1.4排（部分评测简称为双排，视标准定义为1.6排至2排之间）\n节流装置: 电子膨胀阀\n来源: https://www.zhihu.com/question/633082269/answer/3482761024 ， https://item.jd.com/100084120503.html\n备注: 经查阅科龙3匹立柜系列拆机评测及京东自营商品详情页，确认其冷凝器采用2组完整管+"
+ },
+ "kfr72lw/qs1-x1b": {
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://www.zhihu.com/question/595578869/answer/3279623525",
+  "final": true,
+  "answer_excerpt": "铜管排数: 双排\n节流装置: 电子膨胀阀\n来源: https://www.zhihu.com/question/595578869/answer/3279623525\n备注: 一篇针对科龙QS1-X1系列（含3匹柜机）的拆机评测文章证实其外机采用双排冷凝器铜管与电子膨胀阀。"
+ },
+ "kfr35gw/qse2-1max": {
+  "coil_rows": "单排",
+  "throttle_type": "毛细管",
+  "evidence_url": "https://www.bilibili.com/video/BV1FZ421W7gX",
+  "final": true,
+  "answer_excerpt": "铜管排数: 单排\n节流装置: 毛细管\n来源: https://www.bilibili.com/video/BV1FZ421W7gX\n备注: 根据拆机评测视频图文信息确认，该型号（科龙云朵猫Max KFR-35GW/QSE2-1Max）外机冷凝器为单排铜管，节流装置采用毛细管。"
+ },
+ "kfr72lw/qs1-x1a": {
+  "evidence_url": "https://www.kelon.com/product/kelonQS1-X1A",
+  "final": false,
+  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: https://www.kelon.com/product/kelonQS1-X1A\n备注: 经联网检索厂商官网及电商详情页，官方参数表及公开拆机评测中均未标注该型号的具体外机铜管排数与节流装置用料，严格遵守无来源不猜测原则。"
+ },
+ "kfr35gw/qs1max-x1": {
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://www.bilibili.com/video/BV1of421Q7FH/",
+  "final": true,
+  "answer_excerpt": "铜管排数: 双排\n节流装置: 电子膨胀阀\n来源: https://www.bilibili.com/video/BV1of421Q7FH/ , https://www.smzdm.com/p/103576567/\n备注: 经UP主拆机评测及数码社区用料汇总确认，该机型外机为双排铜管换热器，且配备电子膨胀阀。"
+ },
+ "kfr35gw/lx1-x1(1s12)": {
+  "coil_rows": "单排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://zhuanlan.zhihu.com/p/660809156",
+  "final": true,
+  "answer_excerpt": "铜管排数: 单排\n节流装置: 电子膨胀阀\n来源: https://zhuanlan.zhihu.com/p/660809156\n备注: 参考该型号（及同系列同结构机型）的拆机评测文章，外机冷凝器为单排铜管设计，节流装置采用了电子膨胀阀。"
+ },
+ "kfr50lw/vifdbp-a1(1p60)": {
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://tieba.baidu.com/p/5353095288",
+  "final": true,
+  "answer_excerpt": "铜管排数: 2排（双排）\n节流装置: 电子膨胀阀\n来源: https://tieba.baidu.com/p/5353095288\n备注: 经查证，该机型所属的科龙“金镶玉”系列2P柜机拆机评测显示其采用双排冷凝器及电子膨胀阀，此配置与同代海信/科龙旗下机型用料基本一致。"
+ },
+ "kfr72lw/qs1-x1(2n87)": {
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://zhuanlan.zhihu.com/p/635786447",
+  "final": true,
+  "answer_excerpt": "铜管排数: 双排\n节流装置: 电子膨胀阀\n来源: https://zhuanlan.zhihu.com/p/635786447\n备注: 基于家电拆机评测文章对该型号外机冷凝器及节流装置的拆解实测确认。"
+ },
+ "kfr72lw/lf1x-x1(2n65)": {
+  "evidence_url": "https://www.kelon.com/",
+  "final": false,
+  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: https://www.kelon.com/\n备注: 经多方检索，未能找到针对该具体型号（KFR-72LW/LF1X-X1(2N65)）的拆机评测或详细硬件用料参数，厂商公开规格表未披露铜管排数与节流装置信息，遵循要求不作猜测。"
+ },
+ "kfr50lw/ltfdbp-a1(1p60)": {
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://zhuanlan.zhihu.com/p/658923898",
+  "final": true,
+  "answer_excerpt": "铜管排数: 2排\n节流装置: 电子膨胀阀\n来源: https://zhuanlan.zhihu.com/p/658923898\n备注: 该拆机评测专门针对科龙静美人2匹新一级能效柜机（对应1P60'),详细记录外机为双排铜管冷凝器及配有电子膨胀阀。"
+ },
+ "kfr72lw/mf2-x1": {
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://www.zhihu.com/zvideo/1640385957023338496",
+  "final": true,
+  "answer_excerpt": "铜管排数: 双排\n节流装置: 电子膨胀阀\n来源: https://www.zhihu.com/zvideo/1640385957023338496\n备注: 该型号为科龙玉润系列3匹柜机，全网拆机评测视频已证实其外机采用双排铜管冷凝器及电子膨胀阀。"
+ },
+ "kfr26gw/qaa1(1n41)": {
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://www.bilibili.com/video/BV1mV4y1B7HS/",
+  "final": true,
+  "answer_excerpt": "铜管排数: 双排\n节流装置: 电子膨胀阀\n来源: https://www.bilibili.com/video/BV1mV4y1B7HS/\n备注: 根据网络拆机评测显示，该型号外机为双排冷凝器且配备电子膨胀阀；由于厂商公开参数表通常不列出这两项硬件细节，故以拆机视频实测作为来源。"
+ },
+ "kfr35gw/n8ha1iii-p": {
+  "coil_rows": "1.6排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://zhuanlan.zhihu.com/p/684760065",
+  "final": true,
+  "answer_excerpt": "铜管排数: 1.6排\n节流装置: 电子膨胀阀\n来源: https://zhuanlan.zhihu.com/p/684760065\n备注: 经检索，该型号（华凌HEProIII系列1.5匹）有第三方拆机评测明确指出其采用1.6排冷凝器铜管及电子膨胀阀。"
+ },
+ "kfr35gw/n8ha1iii-h": {
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://www.zhihu.com/question/652037922/answer/3463548497",
+  "final": true,
+  "answer_excerpt": "铜管排数: 双排\n节流装置: 电子膨胀阀\n来源: https://www.zhihu.com/question/652037922/answer/3463548497\n备注: 华凌N8HA1III（含此1.5匹型号）在评测拆机中确认为双排铜管换热器并带有电子膨胀阀。"
+ },
+ "kfr120lw/n8ha1s": {
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://zhuanlan.zhihu.com/p/450775375",
+  "final": true,
+  "answer_excerpt": "铜管排数: 双排\n节流装置: 电子膨胀阀\n来源: https://zhuanlan.zhihu.com/p/450775375\n备注: 经查证多篇拆机评测，华凌5匹N8HA1S柜机外机采用双排铜管冷凝器，且配备电子膨胀阀作为节流装置。"
+ },
+ "kfr35gw/n8he1ii": {
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://zhuanlan.zhihu.com/p/705185289",
+  "final": true,
+  "answer_excerpt": "铜管排数: 大双排\n节流装置: 电子膨胀阀\n来源: https://zhuanlan.zhihu.com/p/705185289\n备注: 经查证多篇拆机评测（包含知乎、B站等数码家电博主的图文及视频拆机），华凌神机二代N8HE1II外机采用大双排冷凝器及电子膨胀阀，且压缩机搭载美芝10cc大排量型号。由于原文中存在短视频和多图集合，此处提供知乎图文拆机评测汇总页作为有效URL参考来源。"
+ },
+ "kfr35gw/n8he1iipro": {
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://zhuanlan.zhihu.com/p/717023188",
+  "final": true,
+  "answer_excerpt": "铜管排数: 24组（双排）\n节流装置: 电子膨胀阀\n来源: https://zhuanlan.zhihu.com/p/717023188\n备注: 经查证，“N8HE1 II Pro”为华凌神机二代Pro，执行新国标后外机改为双排24组铜管，并标配电子膨胀阀。"
+ },
+ "kfr35gw/bpr3hqa1(b1)a": {
+  "coil_rows": "1.6排",
+  "throttle_type": "毛细管",
+  "evidence_url": "https://zhuanlan.zhihu.com/p/658030629",
+  "final": true,
+  "answer_excerpt": "铜管排数: 1.6排\n节流装置: 未知\n来源: https://zhuanlan.zhihu.com/p/658030629\n备注: 经查证拆机评测，该型号外机使用1.6排冷凝器铜管，拆机图文未明确展示节流装置的具体类型（部分资料传言为毛细管但缺乏实拍截图证据，故节流装置记为未知），且全网无官方详情页明确标注该项硬件用料。"
+ },
+ "kfr72lw/n8he1ii": {
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://info.zol.com.cn/850/8499988.html",
+  "final": true,
+  "answer_excerpt": "铜管排数: 双排\n节流装置: 电子膨胀阀\n来源: https://info.zol.com.cn/850/8499988.html\n备注: 中关村在线拆机评测显示，该3匹神机二代采用了双排铜管冷凝器与电子膨胀阀的用料组合。"
+ },
+ "kfr72lw/n8ha1iii-a": {
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://www.zhihu.com/question/631728109/answer/3318365237",
+  "final": true,
+  "answer_excerpt": "铜管排数: 双排\n节流装置: 电子膨胀阀\n来源: https://www.zhihu.com/question/631728109/answer/3318365237\n备注: 经查证，该3匹新一级能效立柜式空调采用双排冷凝器搭配电子膨胀阀的用料方案，多见于家电评测博主拆机确认信息。"
+ },
+ "kfr35gw/n8hl1max": {
+  "coil_rows": "1.6排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://zhuanlan.zhihu.com/p/668962877",
+  "final": true,
+  "answer_excerpt": "铜管排数: 1.6排\n节流装置: 电子膨胀阀\n来源: https://zhuanlan.zhihu.com/p/668962877\n备注: 来源为知乎详细拆机评测文章，实物拆解证实外机为1.6排换热器且配备电子膨胀阀。"
+ },
+ "kfr72lw/n8he1iiultra": {
+  "evidence_url": "https://www.zhihu.com/search?q=华凌KFR-72LW%2FN8HE1IIUltra",
+  "final": false,
+  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: https://www.zhihu.com/search?q=华凌KFR-72LW%2FN8HE1IIUltra\n备注: 经联网检索，目前各大科技拆机评测网站与电商平台均未发布该具体型号的拆机数据及详细硬件用料参数，遵循要求不作猜测。"
+ },
+ "kfr51lw/n1a1": {
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://www.bilibili.com/video/BV1XP4y1F7gS/",
+  "final": true,
+  "answer_excerpt": "铜管排数: 双排\n节流装置: 电子膨胀阀\n来源: https://www.bilibili.com/video/BV1XP4y1F7gS/ (拆机评测) 及 https://www.smzdm.com/p/54608011/ (商品页用户实拆)\n备注: 经查证相关立柜式空调拆机图文与视频，该型号外机采用双排铜管冷凝器及电子膨胀阀节流。"
+ },
+ "kfr26gw/r1x1": {
+  "coil_rows": "单排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://www.smzdm.com/pinpas/865/",
+  "final": true,
+  "answer_excerpt": "铜管排数: 单排\n节流装置: 毛细管\n来源: https://www.smzdm.com/pinpas/865/\n备注: 经查证相关拆机评测，该型号（米家1.0匹R1X1）受限于1.0匹定位与成本，外机采用单排冷凝器且未配备电子膨胀阀。"
+ },
+ "kfr35gw/m1a1": {
+  "coil_rows": "单排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://www.bilibili.com/video/BV1Fm4y1U7xQ/",
+  "final": true,
+  "answer_excerpt": "铜管排数: 单排\n节流装置: 电子膨胀阀\n来源: https://www.bilibili.com/video/BV1Fm4y1U7xQ/ , https://www.smzdm.com/p/58894547/\n备注: 拆机评测显示该机型采用单排冷凝器（约24根铜管），且配备电子膨胀阀。"
+ },
+ "kfr35gw/f5a1": {
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://www.bilibili.com/video/BV1ut4y1H7kF/",
+  "final": true,
+  "answer_excerpt": "铜管排数: 双排\n节流装置: 电子膨胀阀\n来源: https://www.bilibili.com/video/BV1ut4y1H7kF/\n备注: 经查证B站硬件拆机评测，该机型（小米新风F5A1）外机采用24根U型管的双排冷凝器，且配备电子膨胀阀。"
+ },
+ "kfr35gw/n1a1": {
+  "coil_rows": "单排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://zhuanlan.zhihu.com/p/576413927",
+  "final": true,
+  "answer_excerpt": "铜管排数: 单排\n节流装置: 毛细管\n来源: https://zhuanlan.zhihu.com/p/576413927\n备注: 经查证主流拆机评测，该1.5P型号外机采用单排冷凝器且节流装置为毛细管，未见电子膨胀阀。"
+ },
+ "kfr35gw/m4a1": {
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://zhuanlan.zhihu.com/p/691660600",
+  "final": true,
+  "answer_excerpt": "铜管排数: 双排\n节流装置: 电子膨胀阀\n来源: https://zhuanlan.zhihu.com/p/691660600\n备注: 经查证，小米自然风Pro（M4A1）外机采用双排铜管换热器及电子膨胀阀，硬件用料扎实；该评测详细记录了相关拆机实测信息。"
+ },
+ "kfr35gw/m2a1": {
+  "coil_rows": "1.6排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://www.bilibili.com/video/BV1Xm4y1P7kS/",
+  "final": true,
+  "answer_excerpt": "铜管排数: 1.6排\n节流装置: 毛细管\n来源: https://www.bilibili.com/video/BV1Xm4y1P7kS/ | https://www.smzdm.com/p/6647799444/\n备注: 上述链接为B站及什么值得买的详细拆机评测，评测显示该型号外机冷凝器为1.6排铜管，且节流装置采用毛细管而非电子膨胀阀。"
+ },
+ "kfr35gw/(35562)fnhcd-b1(wifi)": {
+  "coil_rows": "1.6排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://www.zhihu.com/question/459253790/answer/3026202561",
+  "final": true,
+  "answer_excerpt": "铜管排数: 1.6排\n节流装置: 电子膨胀阀\n来源: https://www.zhihu.com/question/459253790/answer/3026202561 , https://zhuanlan.zhihu.com/p/508446550\n备注: 据知乎平台空调拆机评测记录，该款“京舒享”机型外机冷凝器采用1.6排铜管设计，节流装置配备为电子膨胀阀。"
+ },
+ "kfr72lw/nhbb1bg": {
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://www.zhihu.com/p/653588916",
+  "final": true,
+  "answer_excerpt": "铜管排数: 双排\n节流装置: 电子膨胀阀\n来源: https://www.zhihu.com/p/653588916\n备注: 经查证，该型号（云雅二代）拆机评测显示其外机采用双排铜管换热器，并配备电子膨胀阀；此信息亦符合格力3匹新一级能效柜机的典型硬件用料标准。"
+ },
+ "kfr72lw/nhgr1bt": {
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://www.zhihu.com/question/544225230/answer/3159219738",
+  "final": true,
+  "answer_excerpt": "铜管排数: 2排（双排）\n节流装置: 电子膨胀阀\n来源: https://www.zhihu.com/question/544225230/answer/3159219738 , https://www.sinzig9.com/zhishi/26114.html\n备注: 经查证，该型号为格力3匹云欢系列立柜式空调，外部拆机评测与选购指南一致确认其采用双排铜管冷凝器及电子膨胀阀；因无单一官方底页直接"
+ },
+ "kfr35gw/jhfnhaa1bj": {
+  "evidence_url": "https://www.gree.com/all-product-center/list-0001/zhixuhuiduobifeikimuhuomaon",
+  "final": false,
+  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: https://www.gree.com/all-product-center/list-0001/zhixuhuiduobifeikimuhuomaon\n备注: 未能查证到该具体型号（小凉神系列）的拆机评测与官方详细硬件物料参数，在不确定的情况下不作猜测。"
+ },
+ "kfr72lw/(72533)fnhas-b1(wifi)": {
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://www.zhidx.com/414509.html",
+  "final": true,
+  "answer_excerpt": "铜管排数: 2排\n节流装置: 电子膨胀阀\n来源: https://www.zhidx.com/414509.html\n备注: 经查证第三方拆机评测，该3匹机型搭载双排冷凝器（48根铜管）及电子膨胀阀，硬件用料扎实。"
+ },
+ "kfr72lw/nhgh1bg": {
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://www.zhihu.com/question/485890422",
+  "final": true,
+  "answer_excerpt": "铜管排数: 双排\n节流装置: 电子膨胀阀\n来源: https://www.zhihu.com/question/485890422 https://zhuanlan.zhihu.com/p/558254812\n备注: 经查证，格力3匹云佳（KFR-72LW/NhGh1BG）采用双排冷凝器与电子膨胀阀；受限于实时网页抓取工具，以上来源为相关拆机评测及格力同系列机型硬件分析的知识库索引。"
+ },
+ "kfr26gw/jh5k1fnhaeb1(wifi)": {
+  "evidence_url": "https://www.gree.com/allproducts/ylhome/ylkt-gyor/",
+  "final": false,
+  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: https://www.gree.com/allproducts/ylhome/ylkt-gyor/\n备注: 经联网查证，该具体型号的拆机评测及厂商公开参数表中均未公开外机换热器铜管排数与节流装置类型的具体硬件用料信息，按要求不做猜测。"
+ },
+ "kfr72lw/nhne1bgj": {
+  "note": "no positive evidence in answer",
+  "final": false,
+  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: 未找到相关拆机评测或官方核心参数页\n备注: 作为一个无法直接联网获取实时页面的AI模型，我的离线知识库中未包含“格力 KFR-72LW/NhNe1BGj”的具体拆机数据与硬件供应链规格，且不对外机换热器排数及节流装置类型作任何主观猜测。"
+ },
+ "kfr35gw/(35587)fnhag-b1": {
+  "evidence_url": "https://www.gree.com",
+  "final": false,
+  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: https://www.gree.com\n备注: 经检索官方资料及第三方数据库，未能找到该具体型号（KFR-35GW/(35587)FNhAg-B1）拆机评测或硬件用料的确切记录，按不猜测原则记为未知。"
+ },
+ "kfr26gw/(26587)fnhah-b1": {
+  "coil_rows": "1.6排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://www.zhihu.com/question/476726438/answer/3188871325",
+  "final": true,
+  "answer_excerpt": "铜管排数: 1.6排\n节流装置: 电子膨胀阀\n来源: https://www.zhihu.com/question/476726438/answer/3188871325\n备注: 经查证多个拆机评测汇总信息确认，外机为1.6排铜管换热器且配备电子膨胀阀。"
  }
 }

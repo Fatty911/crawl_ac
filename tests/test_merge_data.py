@@ -224,6 +224,17 @@ class TestValueNormalization:
         assert merged["coil_rows"] == "双排"
 
 
+
+
+    def test_normalize_brand_leader(self):
+        from merge_data import normalize_brand
+        assert normalize_brand("Leader") == "统帅"
+        assert normalize_brand("LEADER") == "统帅"
+        assert normalize_brand("统帅") == "统帅"
+        assert normalize_brand("Colmo") == "COLMO"
+        assert normalize_brand("格力") == "格力"
+
+
 class TestMergeGroup:
     def _row(self, source, pid, **fields):
         row = {

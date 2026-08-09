@@ -120,6 +120,28 @@ def _clean(value: Any) -> str:
     return re.sub(r"\s+", " ", str(value or "")).strip()
 
 
+def normalize_brand(value: Any) -> str:
+    """品牌别名归一化：Leader→统帅（京东等源用英文名），其它品牌名统一。"""
+    text = _clean(value)
+    if not text:
+        return ""
+    return BRAND_ALIASES.get(text, text)
+
+
+# 品牌别名（英文/变体 → 中文统一名）
+BRAND_ALIASES = {
+    "Leader": "统帅",
+    "LEADER": "统帅",
+    "leader": "统帅",
+    "TONG SHUAI": "统帅",
+    "Tongshuai": "统帅",
+    "Colmo": "COLMO",
+    "Wahin": "华凌",
+    "KELON": "科龙",
+    "Kelon": "科龙",
+}
+
+
 def normalize_hp(value: Any) -> str:
     """归并匹数写法：'1.5P'->'1.5匹'、'3.0P'->'3匹'、'大1.0P'->'大1匹'。
 
@@ -250,7 +272,9 @@ def merge_group(identity: str, rows: list[dict[str, Any]]) -> dict[str, Any]:
     model = merged.get("model") or identity
     brand = merged.get("brand") or ""
     merged["title"] = f"{brand}{model}" if brand and not str(merged.get("title", "")).startswith(brand) else (merged.get("title") or f"{brand}{model}")
-    # 值归并（自发现自优化：P/匹、新一级能效/新一级、2排/双排）
+    # 值归并（自发现自优化：P/匹、新一级能效/新一级、2排/双排、品牌别名）
+    if merged.get("brand"):
+        merged["brand"] = normalize_brand(merged["brand"])
     for field, normalizer in (("hp", normalize_hp),
                               ("energy_grade", normalize_energy_grade),
                               ("coil_rows", normalize_coil_rows)):

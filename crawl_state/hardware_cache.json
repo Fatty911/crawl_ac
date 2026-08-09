@@ -1616,5 +1616,41 @@
   "note": "no positive evidence in answer",
   "final": false,
   "answer_excerpt": "为了查证格力 KFR-50LW/NhAj1BGj 的硬件用料，我将联网搜索相关拆机评测和商品详情。"
+ },
+ "kfr35gw/81": {
+  "note": "no positive evidence in answer",
+  "final": false,
+  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: 未知\n备注: 联网未能检索到“海尔 KFR-35GW/81@U1-Gn”型号的专业拆机评测报告或官方详细硬件用料参数表，无法确切查证其换热器铜管排数和节流装置类型，未作任何猜测。"
+ },
+ "kfr35gw/zdcsw1": {
+  "evidence_url": "https://www.changhong.com/products/jiadian/kongtiao/2024nianxinkuanA1ji1-5pNSfuwenguaishiyong.html",
+  "final": false,
+  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: https://www.changhong.com/products/jiadian/kongtiao/2024nianxinkuanA1ji1-5pNSfuwenguaishiyong.html\n备注: 各大搜索引擎及电商平台的评测文章与商品详情页均未提及该型号的换热器排数与节流装置类型，厂商官网也无此两项详细硬件规格，严格按照要求不进行猜测。"
+ },
+ "kfr35gw/06eds81": {
+  "evidence_url": "https://www.gree.com",
+  "final": false,
+  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: https://www.gree.com\n备注: 经联网检索，未能在厂商官方参数表、主流家电拆机评测平台或电商商品详情页中找到该“劲享系列”特定细分型号（KFR-35GW/06EDS81）的拆机硬件用料信息，遵循不猜测原则记为未知。"
+ },
+ "kfr72lw/81": {
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://info.zj.com/detail/14651974s.html",
+  "final": true,
+  "answer_excerpt": "铜管排数: 双排\n节流装置: 电子膨胀阀\n来源: https://info.zj.com/detail/14651974s.html\n备注: 根据家电评测信息，该型号外机采用双排冷凝器铜管，且配备电子膨胀阀节流。"
+ },
+ "kfr35gw/06bha81u1": {
+  "coil_rows": "1.6排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://zhuanlan.zhihu.com/p/637120898",
+  "final": true,
+  "answer_excerpt": "铜管排数: 1.6排\n节流装置: 电子膨胀阀\n来源: https://zhuanlan.zhihu.com/p/637120898\n备注: 经检索，该型号（06BHA81U1）硬件配置与海尔静悦01（06EDS81）同款，参考知乎相关拆机评测，其室外机冷凝器为1.6排铜管，且配备电子膨胀阀。"
+ },
+ "kfr26gw/zdcsw1": {
+  "coil_rows": "1.6排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://zhuanlan.zhihu.com/p/641653519",
+  "final": true,
+  "answer_excerpt": "铜管排数: 1.6排\n节流装置: 电子膨胀阀\n来源: https://zhuanlan.zhihu.com/p/641653519\n备注: 基于数码家电领域拆机评测数据，该型号采用1.6排冷凝器和电子膨胀阀，在同级别大1匹机型中用料属于主流扎实水平。"
  }
 }

@@ -55,6 +55,7 @@ jobs:
 
       - name: AI-extract hardware facts
         continue-on-error: true
+        timeout-minutes: 30
         env:
           # 各套餐独立 key/独立 baseURL（CodingPlan=/api/coding/v3，AgentPlan=/api/plan/v3）
           NVIDIA_API_KEY: ${{ secrets.NVIDIA_NIM_API_KEY }}
@@ -63,7 +64,7 @@ jobs:
           VOLCENGINE_AGENT_PLAN_API_KEY: ${{ secrets.VOLCENGINE_AGENT_PLAN_API_KEY }}
         run: |
           if [ -f release/ac-latest.json ]; then
-            python scripts/ai_extract_hardware.py               --input release/ac-latest.json               --output release/ac-latest-hardware.json               --max-items 100
+            python -u scripts/ai_extract_hardware.py               --input release/ac-latest.json               --output release/ac-latest-hardware.json               --max-items 60
           fi
 
       - name: Upload hardware cache for next run

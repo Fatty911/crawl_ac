@@ -30,8 +30,10 @@ CACHE_FILE = Path(
 )
 MAX_BATCH = int(os.environ.get("HARDWARE_MAX_BATCH", "6"))
 MAX_TOKENS = int(os.environ.get("HARDWARE_MAX_TOKENS", "400"))
-API_TIMEOUT = int(os.environ.get("HARDWARE_API_TIMEOUT", "40"))
-MAX_RETRIES = 3
+API_TIMEOUT = int(os.environ.get("HARDWARE_API_TIMEOUT", "15"))
+MAX_RETRIES = 2
+# 单条总时间预算：超过即放弃本条（防端点挂起拖垮整轮）
+ITEM_TIME_BUDGET = float(os.environ.get("HARDWARE_ITEM_BUDGET", "60"))
 MIN_REQUEST_INTERVAL = 0.8
 _last_request_time = 0.0
 
@@ -91,11 +93,15 @@ def _llm_call(prompt: str) -> str | None:
     never blocks the next endpoint.
     """
     global _last_request_time
+    deadline = time.monotonic() + ITEM_TIME_BUDGET
     for _round in range(1, MAX_RETRIES + 1):
         for key_name, url, model in ENDPOINTS:
             key = _get_key(key_name)
             if not key:
                 continue
+            if time.monotonic() >= deadline:
+                print("LLM item time budget exhausted; skipping remainder")
+                return None
             elapsed = time.monotonic() - _last_request_time
             if elapsed < MIN_REQUEST_INTERVAL:
                 time.sleep(MIN_REQUEST_INTERVAL - elapsed)

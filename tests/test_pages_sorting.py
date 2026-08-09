@@ -18,22 +18,26 @@ APP_JS = ROOT / "docs" / "app.js"
 SAMPLE_ITEMS = [
     {"identity_key": "kfr35gw/a1", "brand": "华凌", "model": "KFR-35GW/A1",
      "ac_type": "壁挂式", "inverter": True, "apf": 5.3, "air_flow": 730,
-     "price": 1499, "cooling_capacity": 3500, "source_count": 2,
+     "price": 1499, "cooling_capacity": 3500, "source_count": 2, "hp": "1匹",
+     "energy_grade": "新一级",
      "throttle_type": "电子膨胀阀", "coil_rows": "双排", "indoor_noise": "18-35-41dB",
      "atomic_source_names": ["PConline", "JD"]},
     {"identity_key": "kfr35gw/a2", "brand": "华凌", "model": "KFR-35GW/A2",
      "ac_type": "壁挂式", "inverter": True, "apf": 5.3, "air_flow": 700,
-     "price": 1299, "cooling_capacity": 3500, "source_count": 1,
+     "price": 1299, "cooling_capacity": 3500, "source_count": 1, "hp": "2匹",
+     "energy_grade": "1级",
      "throttle_type": "电子膨胀阀", "coil_rows": "1.6排", "indoor_noise": "20-38-42dB",
      "atomic_source_names": ["PConline"]},
     {"identity_key": "kfr35gw/a3", "brand": "华凌", "model": "KFR-35GW/A3",
      "ac_type": "壁挂式", "inverter": True, "apf": 5.0, "air_flow": 760,
-     "price": 1199, "cooling_capacity": 3400, "source_count": 1,
+     "price": 1199, "cooling_capacity": 3400, "source_count": 1, "hp": "大1匹",
+     "energy_grade": "2级",
      "throttle_type": "毛细管", "coil_rows": "单排", "indoor_noise": "19-37-40dB",
      "atomic_source_names": ["PConline"]},
     {"identity_key": "kfr35gw/a4", "brand": "华凌", "model": "KFR-35GW/A4",
      "ac_type": "壁挂式", "inverter": True, "apf": None, "air_flow": None,
-     "price": 999, "cooling_capacity": 3300, "source_count": 1,
+     "price": 999, "cooling_capacity": 3300, "source_count": 1, "hp": "3匹",
+     "energy_grade": "3级",
      "throttle_type": "未知", "coil_rows": "未知", "indoor_noise": "",
      "atomic_source_names": ["PConline"]},
 ]
@@ -93,9 +97,21 @@ def run_app_js(sort_levels: list[dict], numeric_ranges: dict | None = None):
           vm.runInContext('sortLevels = {sort_json}; numericRanges = {ranges_json};', ctx);
           const sorted = [...data].sort((a, b) => ctx.compareRows(a, b))
                                   .map(i => i.identity_key);
+          const bar = elements["filter-bar"];
+          const chips = (bar.children || []).map((g) => {{
+            const opts = (g.children || [])[1];
+            return {{
+              group: g.children && g.children[0] ? g.children[0]._textContent : "",
+              values: (opts && opts.children || []).map((c) => ({{
+                value: c._textContent,
+                active: (c.className || "").includes("active"),
+              }})),
+            }};
+          }});
           const out = {{
             sorted,
             filtered: ctx.applyFilters().map(i => i.identity_key),
+            chips,
           }};
           console.log("RESULT:" + JSON.stringify(out));
         }}, 80);
@@ -186,3 +202,33 @@ class TestNumericRangeFilter:
         assert "kfr35gw/a1" in out["filtered"]   # 41 ≤ 41
         assert "kfr35gw/a2" not in out["filtered"]  # 42 > 41
         assert "kfr35gw/a4" not in out["filtered"]  # 无噪音值
+
+
+class TestFilterChips:
+    def test_hp_chips_numeric_order(self):
+        """匹数栏按数值排序：1匹 < 大1匹 < 2匹 < 3匹。"""
+        out = run_app_js([{"key": "apf", "dir": "desc"}])
+        hp_group = next(g for g in out["chips"] if g["group"] == "匹数")
+        values = [c["value"] for c in hp_group["values"]]
+        assert values == ["1匹", "大1匹", "2匹", "3匹"], f"实际: {values}"
+
+    def test_energy_grade_chips_order(self):
+        """能效等级：新一级最前，其余按数值。"""
+        out = run_app_js([{"key": "apf", "dir": "desc"}])
+        eg_group = next(g for g in out["chips"] if g["group"] == "能效等级")
+        values = [c["value"] for c in eg_group["values"]]
+        assert values == ["新一级", "1级", "2级", "3级"], f"实际: {values}"
+
+    def test_selected_chip_has_active_class(self):
+        """默认选中 throttle_type=电子膨胀阀 → 对应 chip 有 active。"""
+        out = run_app_js([{"key": "apf", "dir": "desc"}])
+        tt_group = next(g for g in out["chips"] if g["group"] == "节流装置")
+        by_value = {c["value"]: c["active"] for c in tt_group["values"]}
+        assert by_value.get("电子膨胀阀") is True
+        assert by_value.get("毛细管") is False
+
+    def test_unselected_groups_have_no_active(self):
+        """未筛选的组（铜管排数）无 active chip。"""
+        out = run_app_js([{"key": "apf", "dir": "desc"}])
+        coil_group = next(g for g in out["chips"] if g["group"] == "铜管排数")
+        assert all(c["active"] is False for c in coil_group["values"])

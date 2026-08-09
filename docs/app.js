@@ -220,6 +220,32 @@ function renderNumericRanges() {
   }
 }
 
+function sortFilterValues(key, values) {
+  if (key === "hp") {
+    // 匹数按数值序：1匹 < 大1匹 < 1.5匹 < 2匹 < 3匹（大+0.1 / 小-0.1 偏移）
+    const keyOf = (v) => {
+      const m = String(v).match(/(\d+(?:\.\d+)?)/);
+      if (!m) return 999;
+      let n = parseFloat(m[1]);
+      if (String(v).startsWith("大")) n += 0.1;
+      if (String(v).startsWith("小")) n -= 0.1;
+      return n;
+    };
+    return [...values].sort((x, y) => keyOf(x) - keyOf(y) ||
+      String(x).localeCompare(String(y), "zh"));
+  }
+  if (key === "energy_grade") {
+    // 能效等级：新一级放最前，其余按数值（1级<2级<3级）
+    const keyOf = (v) => {
+      if (v === "新一级") return 0.5;
+      const m = String(v).match(/(\d+)/);
+      return m ? parseFloat(m[1]) : 999;
+    };
+    return [...values].sort((x, y) => keyOf(x) - keyOf(y));
+  }
+  return [...values].sort((x, y) => String(x).localeCompare(String(y), "zh"));
+}
+
 function renderFilters() {
   const bar = document.getElementById("filter-bar");
   if (!bar) return;
@@ -235,8 +261,8 @@ function renderFilters() {
   ];
   for (const group of groups) {
     const values = [...new Set(rows.map((r) => r[group.key]).filter((v) => v !== null && v !== undefined && v !== ""))];
-    values.sort((x, y) => String(x).localeCompare(String(y), "zh"));
     if (!values.length) continue;
+    const ordered = sortFilterValues(group.key, values);
     const div = document.createElement("div");
     div.className = "filter-group";
     const label = document.createElement("label");
@@ -244,20 +270,23 @@ function renderFilters() {
     div.appendChild(label);
     const opts = document.createElement("div");
     opts.className = "options";
-    for (const value of values) {
+    const current = filters[group.key] || new Set();
+    for (const value of ordered) {
       const chip = document.createElement("span");
-      chip.className = "chip";
+      // 选中态差异显示：已选中的项加 active class（浅色背景高亮）
+      const isActive = current.has(String(value));
+      chip.className = "chip" + (isActive ? " active" : "");
       chip.textContent = value;
       chip.dataset.key = group.key;
       chip.dataset.value = value;
       chip.addEventListener("click", () => {
-        const current = filters[group.key] || new Set();
-        if (current.has(String(value))) current.delete(String(value));
+        const cur = filters[group.key] || new Set();
+        if (cur.has(String(value))) cur.delete(String(value));
         else {
-          if (!group.multi) current.clear();
-          current.add(String(value));
+          if (!group.multi) cur.clear();
+          cur.add(String(value));
         }
-        filters[group.key] = current;
+        filters[group.key] = cur;
         renderAll();
       });
       opts.appendChild(chip);

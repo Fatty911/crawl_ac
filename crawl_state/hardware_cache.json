@@ -133,9 +133,11 @@
   "answer_excerpt": "铜管排数: 单排\n节流装置: 毛细管\n来源: https://www.zhihu.com/question/570784473/answer/2799051157\n备注: 根据数码家电评测实机拆解文章确认，该机型冷凝器为单排铜管，且节流装置未采用电子膨胀阀而使用毛细管。"
  },
  "kfr72lw/j200-1": {
-  "evidence_url": "https://www.haier.com/air_conditioners/",
-  "final": false,
-  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: https://www.haier.com/air_conditioners/\n备注: 经联网检索，未找到针对该型号（KFR-72LW/J200-1，且已知信息中7325W及72机型实为3匹，已知信息写1.5匹存疑）的专业拆机评测，厂商官方详情页亦未公开换热器排数与节流装置的硬件用料数据，不作猜测。"
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://www.zhihu.com/zvideo/1507369085713088512",
+  "final": true,
+  "answer_excerpt": "铜管排数: 双排\n节流装置: 电子膨胀阀\n来源: https://www.zhihu.com/zvideo/1507369085713088512 （拆机视频评测）及 https://item.jd.com/100034790410.html （商品详情页参数）\n备注: 拆机评测显示外机为双排冷凝器且配备电子膨胀阀，该型号为3匹立柜式空调，已知信息中的1.5匹有误。"
  },
  "kfr72lw/e3-1": {
   "coil_rows": "双排",
@@ -1278,7 +1280,7 @@
  "kfr26gw/(26564)fnhac-b1": {
   "note": "no positive evidence in answer",
   "final": false,
-  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: 无有效来源URL\n备注: 经联网查证，未能在评测文章、商品详情页或厂商参数表中找到该具体型号（KFR-26GW/(26564)FNhAc-B1）关于换热器铜管排数与节流装置的明确拆机用料信息，按照要求不作猜测。"
+  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: 未找到可靠的拆机评测或官方详细硬件规格\n备注: 经联网检索，未能找到针对该具体型号（KFR-26GW/(26564)FNhAc-B1）拆机评测或明确的官方硬件参数表以证实其铜管排数与节流装置类型，未发现来源不明的猜测信息。"
  },
  "kfr26gw/n8hg1": {
   "throttle_type": "电子膨胀阀",
@@ -1289,5 +1291,10 @@
   "note": "no positive evidence in answer",
   "final": false,
   "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: 无\n备注: 经多渠道联网检索，未能找到针对该具体型号（KFR-26GW/NhGt1BGj）的拆机评测报告或详细硬件用料参数，官方详情页亦未明确披露这两项硬件规格。"
+ },
+ "kfr26gw/nhmb1bg": {
+  "note": "no positive evidence in answer",
+  "final": false,
+  "answer_excerpt": "为了查证格力 KFR-26GW/NhMb1BG 空调的硬件用料，我进行了网络搜索。\n\n经过搜索，发现关于该具体型号（大1匹 NhMb1BG）的专业拆机评测文章较少，但可以通过同系列或相关型号的拆机信息及商品详情进行交叉验证。\n\n在搜索过程中，没有找到专门针对“KFR-26GW/NhMb1BG”大1匹版本的详细拆机评测（通常拆机评测多集中于1.5匹版本如NhMb1BG的1.5匹或NhMaB1等）。由"
  }
 }

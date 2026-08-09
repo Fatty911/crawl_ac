@@ -1603,9 +1603,11 @@
   "answer_excerpt": "经过联网搜索查证，针对格力 KFR-35GW/(35504)FnAa-B1（云佳系列）的硬件用料，结果如下：\n\n铜管排数: 双排\n节流装置: 电子膨胀阀\n来源: https://www.sohu.com/a/532580234_121124414\n备注: 多家拆机评测显示该型号（云佳1.5匹新一级）外机采用双排冷凝器铜管，且节流装置为电子膨胀阀。"
  },
  "kfr35gw/(35546)fnhac-b1": {
+  "coil_rows": "双排",
   "throttle_type": "电子膨胀阀",
-  "final": false,
-  "answer_excerpt": "<action>\n<search>格力 KFR-35GW/(35546)FNhAc-B1 拆机</search>\n</action>\n<action>\n<search>格力 智慧鸟 KFR-35GW/(35546)FNhAc-B1 电子膨胀阀</search>\n</action>\n<action>\n<search>格力 KFR-35GW/(35546)FNhAc-B1 参数</search>\n</"
+  "evidence_url": "https://www.zhihu.com/question/531999042/answer/2480482987",
+  "final": true,
+  "answer_excerpt": "以下是针对您提供的空调型号进行的硬件用料查证结果：\n\n铜管排数: 双排\n节流装置: 电子膨胀阀\n来源: https://www.zhihu.com/question/531999042/answer/2480482987\n备注: 根据知乎相关空调拆机评测汇总信息显示，格力智慧鸟该型号外机采用双排冷凝器铜管和电子膨胀阀节流。"
  },
  "kfr26gw/(26546)fnhac-b1": {
   "throttle_type": "电子膨胀阀",
@@ -1664,5 +1666,23 @@
   "note": "no positive evidence in answer",
   "final": false,
   "answer_excerpt": "在进行网络搜索后，未找到针对该具体型号的拆机评测或包含详细硬件用料（如铜管排数、节流装置类型）的商品页和厂商参数表。因此无法确认这两项硬件信息。\n\n铜管排数: 未知\n节流装置: 未知\n来源: 无\n备注: 经联网搜索，未找到该型号的拆机评测或详细硬件用料参数。"
+ },
+ "kfr50lw/nhba1baj": {
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://www.zhihu.com/question/539772738/answer/3303693253",
+  "final": true,
+  "answer_excerpt": "铜管排数: 双排\n节流装置: 电子膨胀阀\n来源: https://www.zhihu.com/question/539772738/answer/3303693253 (拆机评测汇总贴，内含格力各型号拆机数据) / https://item.jd.com/100044170499.html (京东商品页参数及详情)\n备注: 经查证格力云锦系列2匹柜机(KFR-50LW/NhBa1BAj)采用双排铜"
+ },
+ "kfr72lw/(72504)fnhaa-b1": {
+  "throttle_type": "电子膨胀阀",
+  "evidence_url": "https://www.gree.com/products-air-conditioner/detail-5945/",
+  "final": false,
+  "answer_excerpt": "铜管排数: 未知\n节流装置: 电子膨胀阀\n来源: https://www.gree.com/products-air-conditioner/detail-5945/ (格力官方产品页), https://www.bilibili.com/video/BV1xh4y1W7YB/ (B站拆机评测视频)\n备注: 经查证，格力天仪3匹柜机KFR-72LW/(72504)FNhAa-B1采用电子膨胀阀节流"
+ },
+ "kfr35gw/(35598)fnhad-b1(jdwifi)": {
+  "note": "no positive evidence in answer",
+  "final": false,
+  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: 未知\n备注: 经联网搜索，未能找到针对该具体型号（含JDWiFi后缀）的拆机评测或明确标注硬件用料的官方/第三方页面，无法确认其具体铜管排数和节流装置类型。"
  }
 }

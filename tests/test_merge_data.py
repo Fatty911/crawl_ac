@@ -155,6 +155,27 @@ class TestPreserveInheritHardware:
         assert item["throttle_type"] == "毛细管", "candidate 有值时不覆盖"
 
 
+
+
+    def test_inherit_from_git_cache(self):
+        from preserve_publish_baseline import preserve
+        candidate = {"items": [
+            {"identity_key": "kfr35gw/n8ha1iii-h", "brand": "华凌",
+             "model": "KFR-35GW/N8HA1III-H", "ac_type": "壁挂式", "inverter": True,
+             "apf": 5.3, "throttle_type": "未知", "coil_rows": "未知",
+             "atomic_source_names": ["PConline"], "source_count": 1,
+             "source_urls": ["u"], "source_ranks": []},
+        ]}
+        cache = {"kfr35gw/n8ha1iii-h": {"throttle_type": "电子膨胀阀",
+                                        "coil_rows": "双排",
+                                        "evidence_url": "https://example.com/e"}}
+        result = preserve(candidate, None, cache)
+        item = result["items"][0]
+        assert item["throttle_type"] == "电子膨胀阀"
+        assert item["coil_rows"] == "双排"
+        assert item["hardware_evidence_url"] == "https://example.com/e"
+
+
 class TestMergeGroup:
     def _row(self, source, pid, **fields):
         row = {

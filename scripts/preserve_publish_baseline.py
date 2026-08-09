@@ -34,7 +34,38 @@ def _inherit_hardware_fields(item: dict[str, Any], baseline_by_id: dict[str, dic
     return item
 
 
-def preserve(candidate: dict[str, Any], baseline: dict[str, Any] | None) -> dict[str, Any]:
+def _inherit_from_cache(item: dict[str, Any], cache: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    """从 git 硬件缓存继承（cache[identity] = {throttle_type, coil_rows, evidence_url}）。
+
+    硬件缓存由 Hardware Enrich 提交 git（crawl_state/hardware_cache.json），
+    merge 阶段直接应用，发布即恢复已提取参数，不等提取轮次。
+    """
+    entry = cache.get(item.get("identity_key"))
+    if not entry:
+        return item
+    for field, cache_key in (("throttle_type", "throttle_type"),
+                             ("coil_rows", "coil_rows"),
+                             ("hardware_evidence_url", "evidence_url")):
+        current = item.get(field)
+        if current in (None, "", "未知"):
+            inherited = entry.get(cache_key)
+            if inherited not in (None, "", "未知"):
+                item[field] = inherited
+    return item
+
+
+def load_cache(path: str | None) -> dict[str, dict[str, Any]]:
+    if not path:
+        return {}
+    try:
+        data = json.loads(Path(path).read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    return {str(k): v for k, v in data.items() if isinstance(v, dict)}
+
+
+def preserve(candidate: dict[str, Any], baseline: dict[str, Any] | None,
+             cache: dict[str, dict[str, Any]] | None = None) -> dict[str, Any]:
     candidate_items = candidate.get("items", [])
     baseline_items = (baseline or {}).get("items", [])
     eligible_baseline = [item for item in baseline_items if check_publication(item)[0]]
@@ -44,9 +75,13 @@ def preserve(candidate: dict[str, Any], baseline: dict[str, Any] | None) -> dict
         if item.get("identity_key") not in candidate_ids
     ]
     baseline_by_id = {item.get("identity_key"): item for item in eligible_baseline}
-    # 继承：candidate 新版本补回 baseline 的硬件参数
+    cache = cache or {}
+    # 继承：candidate 新版本补回 baseline 的硬件参数 + git 缓存
     candidate_items = [
-        _inherit_hardware_fields(dict(item), baseline_by_id) for item in candidate_items
+        _inherit_from_cache(
+            _inherit_hardware_fields(dict(item), baseline_by_id), cache
+        )
+        for item in candidate_items
     ]
     merged = [*candidate_items, *preserved]
     payload = {
@@ -75,11 +110,13 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--candidate", required=True)
     parser.add_argument("--baseline", required=True)
+    parser.add_argument("--cache", default=None, help="git hardware cache json")
     parser.add_argument("--output", required=True)
     args = parser.parse_args()
     result = preserve(
         read_payload(Path(args.candidate)) or {"items": []},
         read_payload(Path(args.baseline)),
+        load_cache(args.cache),
     )
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)

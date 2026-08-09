@@ -117,6 +117,7 @@ jobs:
           python scripts/preserve_publish_baseline.py \
             --candidate data/work/candidate.json \
             --baseline baseline/ac-latest.json \
+            --cache crawl_state/hardware_cache.json \
             --output dist/ac-latest.json
 
       - name: Verify no published identity or source regresses

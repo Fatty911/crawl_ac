@@ -73,8 +73,21 @@ def _save_cache(cache: dict[str, dict[str, Any]]) -> None:
     )
 
 
+# 端点 key 环境变量别名（workflow 可能只传其中一个名字）
+KEY_ALIASES = {
+    "VOLCENGINE_CODING_PLAN_API_KEY": ("VOLCENGINE_CODING_PLAN_API_KEY",
+                                       "VOLCENGINE_AGENT_PLAN_API_KEY"),
+    "VOLCENGINE_AGENT_PLAN_API_KEY": ("VOLCENGINE_AGENT_PLAN_API_KEY",
+                                      "VOLCENGINE_CODING_PLAN_API_KEY"),
+}
+
+
 def _get_key(name: str) -> str:
-    return os.environ.get(name, "")
+    for candidate in KEY_ALIASES.get(name, (name,)):
+        value = os.environ.get(candidate, "")
+        if value:
+            return value
+    return ""
 
 
 def _llm_call(prompt: str) -> str | None:

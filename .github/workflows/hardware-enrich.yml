@@ -58,6 +58,8 @@ jobs:
         env:
           NVIDIA_NIM_API_KEY: ${{ secrets.NVIDIA_NIM_API_KEY }}
           VOLCENGINE_AGENT_PLAN_API_KEY: ${{ secrets.VOLCENGINE_AGENT_PLAN_API_KEY }}
+          # ai_extract_hardware 端点路由读取的 key 名（值=volcengine-coding key）
+          VOLCENGINE_CODING_PLAN_API_KEY: ${{ secrets.VOLCENGINE_AGENT_PLAN_API_KEY }}
         run: |
           if [ -f release/ac-latest.json ]; then
             python scripts/ai_extract_hardware.py               --input release/ac-latest.json               --output release/ac-latest-hardware.json               --max-items 100

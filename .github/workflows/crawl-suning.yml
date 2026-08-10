@@ -92,7 +92,7 @@ jobs:
           python scripts/setup_proxy_runtime.py
           --require-proxy
           --test-url
-          https://search.suning.com/%E7%A9%BA%E8%B0%83/
+          https://www.suning.com/
 
       - name: Clamp step1 runtime to workflow budget
         if: steps.window.outputs.skip != 'true'

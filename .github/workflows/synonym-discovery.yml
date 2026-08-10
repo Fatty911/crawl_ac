@@ -26,7 +26,7 @@ env:
 jobs:
   discover:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@main
         with:
@@ -71,16 +71,49 @@ jobs:
           # 注：--rejected 用 merged 占位（rejection_reasons 统计不完整不影响
           # synonym_conflicts 检测——它只消费 --raw；merge run 的 rejected 未上传 artifact）
           python - <<'EOF'
-          import json
+          import json, sys
+          sys.path.insert(0, 'scripts')
+          from merge_data import normalize_hp, normalize_energy_grade, normalize_coil_rows
+
           report = json.load(open('conflicts_report.json', encoding='utf-8'))
           conflicts = report.get('synonym_conflicts', [])
-          print(f'同义词冲突候选: {len(conflicts)}')
-          if not conflicts:
+          print(f'同义词冲突候选(原始): {len(conflicts)}')
+
+          # 确定性预筛：已有归一规则能解释的冲突直接排除（如 1.5P vs 1.5匹——
+          # normalize_hp 已归并，不需要 Agent 判定）
+          NORMALIZERS = {
+              "hp": normalize_hp,
+              "energy_grade": normalize_energy_grade,
+              "coil_rows": normalize_coil_rows,
+          }
+          novel = []
+          for c in conflicts:
+              norm = NORMALIZERS.get(c["field"])
+              if norm:
+                  normed = {norm(v) for v in c["values"]}
+                  if len(normed) <= 1:
+                      continue  # 已有规则覆盖
+              novel.append(c)
+          print(f'预筛后候选: {len(novel)}')
+
+          # 模式聚类：同 (field, values) 合并为一条规则候选（附机型示例）
+          by_pattern = {}
+          for c in novel:
+              key = (c["field"], tuple(c["values"]))
+              by_pattern.setdefault(key, []).append(c["identity"])
+          patterns = [
+              {"field": f, "values": list(v), "examples": ids[:5],
+               "model_count": len(ids)}
+              for (f, v), ids in sorted(by_pattern.items(),
+                                        key=lambda kv: -len(kv[1]))
+          ]
+          print(f'模式候选: {len(patterns)}')
+          if not patterns:
               open('.env_out', 'w').write('no_conflicts=true\n')
               print('NO_CONFLICTS=1')
           else:
               with open('conflicts.json', 'w', encoding='utf-8') as f:
-                  json.dump(conflicts, f, ensure_ascii=False, indent=1)
+                  json.dump(patterns, f, ensure_ascii=False, indent=1)
               print('conflicts saved')
           EOF
           if [ -f .env_out ]; then
@@ -114,16 +147,18 @@ jobs:
           export OPENCODE_CONFIG_CONTENT="$(cat opencode_config.json)"
           cat > synonym_prompt.md <<'EOF'
           你是数据归一专家。分析 crawl_ac 仓库的同义词冲突候选（conflicts.json）——
-          同一机型（identity）在不同数据源里的字段写法差异。
+          每个候选是一条模式：{field, values, examples, model_count}——同一机型
+          （examples 里的型号）在不同数据源里该字段的写法差异。
 
           任务：
-          1. 读 conflicts.json（[{identity, field, values}]）
-          2. 逐条判定：真同义词（写法差异，应归并）还是真配置差异（不同配置，不归并）
+          1. 读 conflicts.json
+          2. 逐条判定：真同义词（写法差异，应归并）还是真配置差异/解析错误（不归并）
           3. 对真同义词：修改 scripts/merge_data.py 的对应归一函数
              （normalize_hp/normalize_energy_grade/normalize_coil_rows 或新映射表），
              用确定性规则归并（参考已有 normalize_coil_rows 的 "2排"->"双排" 模式）
           4. 只改归一函数，不动其它代码；为新增规则补充 tests/test_merge_data.py 断言
           5. 运行 python -m pytest tests/test_merge_data.py 确认全绿
+          6. 最多处理 8 个模式；不确定的保守跳过（宁缺毋滥）
 
           安全边界（用户铁律）：
           - 匹数 "大1.5匹" vs "1.5匹" 是真差异（选购语义不同），绝不归并

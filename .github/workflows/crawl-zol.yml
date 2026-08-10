@@ -82,7 +82,11 @@ jobs:
 
       - name: Install dependencies
         if: steps.window.outputs.skip != 'true'
-        run: python -m pip install -r requirements.txt
+        run: |
+          python -m pip install -r requirements.txt
+          # ZOL 列表页 checking 挑战需真实浏览器渲染（curl 无头特征被拦，Playwright 放行）
+          python -m pip install playwright
+          python -m playwright install chromium --with-deps
 
       - name: Configure required crawler proxy
         if: steps.window.outputs.skip != 'true'

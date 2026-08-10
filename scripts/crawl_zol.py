@@ -22,6 +22,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from bs4 import BeautifulSoup
+
 try:
     from scripts.crawler_utils import (
         absolute_url,
@@ -64,13 +66,13 @@ except ModuleNotFoundError:
     from node_rotator import make_rotator
 
 BASE_URL = "https://detail.zol.com.cn"
-# 候选空调 subcate 路径（首次代理运行探测，选取能渲染 #J_PicMode 的路径）
-CANDIDATE_CATALOGUES = (
-    "aircon_index",
-    "air_index",
-    "airconditioner_index",
-)
-SUB_CATEGORY_IDS = (39, 26, 27, 28, 29, 30, 31, 40, 41, 42)
+# ZOL 空调分类真实路径（2026-08-10 Playwright 实测：air-condition/ 直连可达 61 卡；
+# aircon/ 是 404 + checking；subcate 模板 URL 概率 checking）
+CATALOGUE = "air-condition"
+SUB_CATEGORY_ID = 345
+LIST_PAGE_URL = f"{BASE_URL}/{CATALOGUE}/{{page}}.html"
+LIST_UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+           "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36")
 
 
 def is_checking_page(html: Any, final_url: str) -> bool:
@@ -89,6 +91,11 @@ def parse_ranking_page(html: Any, page: int, brand: str | None = None) -> list[d
         if not link:
             continue
         title = clean_text(link.get_text(" ", strip=True) or link.get("title"))
+        if not title:
+            # a.pic 里是 img——标题在 img alt
+            img = card.select_one("img[alt]")
+            if img:
+                title = clean_text(img.get("alt"))
         if not title:
             continue
         rank = (page - 1) * 48 + index
@@ -124,29 +131,56 @@ def infer_brand(title: str) -> str:
 
 
 def resolve_catalogue(session: Any, rotator: Any, delay: float) -> str:
-    """Probe candidate catalogue paths; return the first that renders cards."""
-    for catalogue in CANDIDATE_CATALOGUES:
-        for sub_id in SUB_CATEGORY_IDS:
-            url = (
-                f"{BASE_URL}/{catalogue}/subcate{sub_id}_0_list_1_0_1_2_0_1.html"
+    """ZOL 空调分类路径已实测确认（air-condition/，2026-08-10 Playwright）。
+    返回 CATALOGUE；调用方负责运行时 checking 重试。"""
+    return CATALOGUE
+
+
+def fetch_list_page_playwright(page_num: int, proxy: str | None = None) -> str | None:
+    """Playwright 渲染列表页（air-condition/{page}.html）。
+
+    ZOL checking 挑战是概率性的（同 URL 有时放行有时拦，实测 3.html 放行、
+    2.html 被拦）——渲染后若落到 checking 页，点击"继续访问"按钮并重试。
+    返回渲染后的完整 HTML；3 次尝试均失败返回 None。
+    """
+    from playwright.sync_api import sync_playwright
+
+    url = LIST_PAGE_URL.format(page=page_num)
+    launch_args = {
+        "headless": True,
+        "args": ["--disable-blink-features=AutomationControlled"],
+    }
+    for attempt in range(1, 5):
+        with sync_playwright() as p:
+            browser = p.chromium.launch(**launch_args)
+            ctx = browser.new_context(
+                user_agent=LIST_UA,
+                locale="zh-CN",
+                proxy={"server": proxy} if proxy else None,
             )
+            page = ctx.new_page()
             try:
-                if rotator and rotator.enabled:
-                    node = rotator.rotate()
-                html, final_url = get_html(session, url, encoding="gb18030",
-                                           delay=delay)
-                if rotator and rotator.enabled and node:
-                    rotator.mark_success(node)
-                if is_checking_page(html, final_url):
-                    continue
-                if html.select("#J_PicMode > li[data-follow-id]"):
-                    print(f"ZOL AC catalogue resolved: {url}")
-                    return catalogue, sub_id
+                page.goto(url, timeout=45000, wait_until="domcontentloaded")
+                page.wait_for_timeout(4000)
+                if "checking" in page.url:
+                    for btn in page.locator("a, button").all():
+                        if "继续" in (btn.inner_text() or ""):
+                            try:
+                                btn.click(timeout=5000)
+                                page.wait_for_timeout(6000)
+                            except Exception:
+                                pass
+                            break
+                # 判定：checking 页特征（URL 含 checking 或正文含"防刷"）
+                body_text = page.inner_text("body")
+                if "checking" not in page.url and "防刷" not in body_text:
+                    return page.content()
+                print(f"  list page {page_num} attempt {attempt}: checking, retry")
             except Exception as exc:
-                if rotator and rotator.enabled and node:
-                    rotator.mark_failure(node, blocked=True)
-                print(f"probe failed {url}: {type(exc).__name__}")
-    return "", 0
+                print(f"  list page {page_num} attempt {attempt}: {type(exc).__name__}")
+            finally:
+                browser.close()
+    return None
 
 
 def main() -> int:
@@ -167,10 +201,11 @@ def main() -> int:
         print("FAIL: ZOL requires proxy node rotation (checking anti-bot)")
         return 2
 
-    catalogue, sub_id = resolve_catalogue(session, rotator, args.delay)
+    catalogue = resolve_catalogue(session, rotator, args.delay)
     if not catalogue:
         print("FAIL: could not resolve ZOL AC catalogue behind proxy")
         return 2
+    sub_id = SUB_CATEGORY_ID
 
     progress = Progress.load(Path(args.progress_dir))
     budget = Budget(args.time_budget)
@@ -184,28 +219,29 @@ def main() -> int:
             all_items.append(line)
 
     page = progress.current_page
+    proxy = None
+    if rotator and rotator.enabled:
+        node = rotator.rotate()
+        # setup_proxy_runtime 导出的 HTTP_PROXY=http://127.0.0.1:7890
+        proxy = os.environ.get("HTTP_PROXY") or os.environ.get("http_proxy") or "http://127.0.0.1:7890"
     while not budget.expired():
         # max_pages=0 表示不限制（0 值语义）
         if args.max_pages and page > args.max_pages:
             break
-        url = (
-            f"{BASE_URL}/{catalogue}/subcate{sub_id}_0_list_1_0_1_2_0_{page}.html"
-        )
-        try:
+        content = fetch_list_page_playwright(page, proxy)
+        if content is None:
+            print(f"ZOL page {page} blocked after retries; aborting scan")
             if rotator and rotator.enabled:
-                node = rotator.rotate()
-            html, final_url = get_html(session, url, encoding="gb18030",
-                                       delay=delay)
-            if rotator and rotator.enabled and node:
-                rotator.mark_success(node)
-        except Exception as exc:
-            if rotator and rotator.enabled and node:
                 rotator.mark_failure(node, blocked=True)
-            print(f"ZOL page {page} failed: {type(exc).__name__}: {exc}")
             break
-        if is_checking_page(html, final_url):
+        html = BeautifulSoup(content, "html.parser")
+        if is_checking_page(html, ""):
             print(f"ZOL page {page} returned checking page; aborting scan")
+            if rotator and rotator.enabled:
+                rotator.mark_failure(node, blocked=True)
             break
+        if rotator and rotator.enabled:
+            rotator.mark_success(node)
         page_items = parse_ranking_page(html, page)
         if not page_items:
             progress.scan_complete = True

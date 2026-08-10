@@ -208,7 +208,8 @@ def main() -> int:
             url = SEARCH_URL.format(keyword=urllib.parse.quote(keyword)) + f"?pageNumber={page}"
             node = stable_node if (rotator.enabled and stable_node) else (rotator.rotate() if rotator.enabled else None)
             try:
-                html, final_url = get_html(session, url, encoding="gb18030",
+                # 苏宁 search.suning.com 是 UTF-8（实测；gb18030 会乱码）
+                html, final_url = get_html(session, url, encoding="utf-8",
                                            delay=delay)
                 if rotator.enabled and node:
                     rotator.mark_success(node)

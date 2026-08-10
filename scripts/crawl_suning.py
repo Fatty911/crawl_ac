@@ -179,6 +179,7 @@ def main() -> int:
             all_items.append(line)
 
     page = progress.current_page or 1
+    consecutive_empty = 0
     while not budget.expired():
         if args.max_pages and page > args.max_pages:
             break
@@ -213,6 +214,14 @@ def main() -> int:
         all_items.extend(page_items)
         progress.current_page = page + 1
         progress.save(progress_dir)
+        # 超出分页范围时苏宁会重复返回第 1 页（30 卡全 seen）→ 连续 3 页无新增即停
+        if not page_items:
+            consecutive_empty += 1
+            if consecutive_empty >= 3:
+                print(f"3 consecutive empty pages at {page}, stop")
+                break
+        else:
+            consecutive_empty = 0
         page += 1
 
     payload = {

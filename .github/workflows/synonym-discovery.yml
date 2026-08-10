@@ -133,11 +133,16 @@ jobs:
           完成后输出：修改的文件清单 + 每处改动理由。
           EOF
           opencode run --pure --agent plan --model volcengine-agentplan/deepseek-v4-flash \
-            --file synonym_prompt.md "分析同义词冲突并实现归一规则" \
+            "分析同义词冲突并实现归一规则" --file synonym_prompt.md \
             --allowedTools "bash:*" --allowedTools "write:*" --allowedTools "edit:*" \
             --allowedTools "read:*" --allowedTools "glob:*" --allowedTools "grep:*" \
             --allowedTools "test:*" --allowedTools "list:*" --allowedTools "ls:*" \
-            --allowedTools "python:*" 2>&1 | tail -30 || echo "opencode failed"
+            --allowedTools "python:*" 2>&1 | tail -30
+          # opencode 失败必须让 run 失败（不能静默吞错假装"无改动"）
+          if [ "${PIPESTATUS[0]}" -ne 0 ]; then
+            echo "::error::opencode Agent 分析失败"
+            exit 1
+          fi
           git diff --stat
 
       - name: Run full tests

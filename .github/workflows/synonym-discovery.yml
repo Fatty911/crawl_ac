@@ -109,7 +109,7 @@ jobs:
         run: |
           # 火山 AgentPlan provider 配置（JSON 严格，禁止 YAML 折叠）
           cat > opencode_config.json <<'EOF'
-          {"provider":{"volcengine-agentplan":{"npm":"@ai-sdk/openai-compatible","options":{"baseURL":"https://ark.cn-beijing.volces.com/api/plan/v3","apiKey":"{env:VOLCENGINE_AGENT_PLAN_API_KEY}"},"models":{"deepseek-v4-flash":{"name":"DeepSeek V4 Flash (AgentPlan)"}}}},"model":"volcengine-agentplan/deepseek-v4-flash"}
+          {"provider":{"volcengine-agentplan":{"npm":"@ai-sdk/openai-compatible","options":{"baseURL":"https://ark.cn-beijing.volces.com/api/plan/v3","apiKey":"{env:VOLCENGINE_AGENT_PLAN_API_KEY}"},"models":{"deepseek-v4-flash":{"name":"DeepSeek V4 Flash (AgentPlan)"}}}},"model":"volcengine-agentplan/deepseek-v4-flash","permission":{"edit":true,"bash":true}}
           EOF
           export OPENCODE_CONFIG_CONTENT="$(cat opencode_config.json)"
           cat > synonym_prompt.md <<'EOF'
@@ -133,12 +133,9 @@ jobs:
           - 只归并有明确同义证据的写法对（如 "3P"->"3匹"、"双排铜管"->"双排"）
           完成后输出：修改的文件清单 + 每处改动理由。
           EOF
-          opencode run --pure --agent plan --model volcengine-agentplan/deepseek-v4-flash \
+          opencode run --pure --agent build --model volcengine-agentplan/deepseek-v4-flash \
             "分析同义词冲突并实现归一规则" --file synonym_prompt.md \
-            --allowedTools "bash:*" --allowedTools "write:*" --allowedTools "edit:*" \
-            --allowedTools "read:*" --allowedTools "glob:*" --allowedTools "grep:*" \
-            --allowedTools "test:*" --allowedTools "list:*" --allowedTools "ls:*" \
-            --allowedTools "python:*" 2>&1 | tail -30
+            2>&1 | tail -40
           # opencode 失败必须让 run 失败（不能静默吞错假装"无改动"）
           if [ "${PIPESTATUS[0]}" -ne 0 ]; then
             echo "::error::opencode Agent 分析失败"

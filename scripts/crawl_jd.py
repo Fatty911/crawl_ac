@@ -96,11 +96,29 @@ def find_hotitem_url(session: Any, rotator: Any, delay: float) -> str:
         "https://channel.jd.com/aircondition.html",
         "https://list.jd.com/list.html?cat=737,794,798",
     ]
-    patterns = (
-        re.compile(r"hotitem/[0-9a-f]+\.html"),
-        re.compile(r'["\'](/hotitem/[0-9a-f]+\.html)["\']'),
-        re.compile(r"空调排行榜[^<]{0,40}?href=[\"']([^\"']+)[\"']"),
+    # 1) 优先：带"空调排行榜"锚文本的链接（品类明确）
+    anchor_pattern = re.compile(
+        r"空调排行榜[^<]{0,60}?href=[\"']([^\"']*hotitem[^\"']*)[\"']"
     )
+    # 2) 兜底：页面内任意 hotitem 链接，但必须抓取验证品类（防止广告位/其它品类）
+    any_pattern = re.compile(r"[\"'](/hotitem/[0-9a-f]+\.html)[\"']")
+
+    def _normalize(raw: str) -> str:
+        if raw.startswith("//"):
+            return "https:" + raw
+        if raw.startswith("/"):
+            return "https://www.jd.com" + raw
+        return raw
+
+    def _verify_ac(page_html: Any) -> bool:
+        """验证 hotitem 页商品确为空调（防三脚架等广告位品类）。"""
+        text = clean_text(page_html.get_text(" ", strip=True))[:2000]
+        ac_hint = ("空调" in text or re.search(r"\d+(?:\.\d+)?匹", text)
+                   or re.search(r"(?:KFR|GW|LW|G/W|L/W)", text, re.IGNORECASE))
+        non_ac_hint = ("三脚架" in text or "相机" in text or "镜头" in text
+                       or "耳机" in text or "手机" in text)
+        return bool(ac_hint) and not non_ac_hint
+
     for url in candidates:
         try:
             if rotator and rotator.enabled:
@@ -114,16 +132,31 @@ def find_hotitem_url(session: Any, rotator: Any, delay: float) -> str:
                 rotator.mark_failure(node, blocked=True)
             print(f"hotitem probe failed {url}: {type(exc).__name__}")
             continue
-        for pattern in patterns:
-            for match in pattern.finditer(str(html)):
-                raw = match.group(1) if match.groups() else match.group(0)
-                if raw.startswith("//"):
-                    raw = "https:" + raw
-                elif raw.startswith("/"):
-                    raw = "https://www.jd.com" + raw
-                if "hotitem" in raw:
-                    print(f"JD AC hotitem discovered: {raw}")
+        # 锚文本优先
+        for match in anchor_pattern.finditer(str(html)):
+            raw = _normalize(match.group(1))
+            if "hotitem" in raw:
+                print(f"JD AC hotitem discovered (anchor): {raw}")
+                return raw
+        # 兜底：候选链接逐个抓取验证品类
+        for match in any_pattern.finditer(str(html)):
+            raw = _normalize(match.group(1))
+            if "hotitem" not in raw:
+                continue
+            try:
+                if rotator and rotator.enabled:
+                    node = rotator.rotate()
+                page, _ = get_html(session, raw, encoding="utf-8", delay=delay)
+                if rotator and rotator.enabled and node:
+                    rotator.mark_success(node)
+                if _verify_ac(page):
+                    print(f"JD AC hotitem discovered (verified): {raw}")
                     return raw
+                print(f"hotitem candidate not AC, skip: {raw}")
+            except Exception as exc:
+                if rotator and rotator.enabled and node:
+                    rotator.mark_failure(node, blocked=True)
+                print(f"hotitem verify failed {raw}: {type(exc).__name__}")
     return ""
 
 

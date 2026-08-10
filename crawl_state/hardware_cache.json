@@ -1684,5 +1684,36 @@
   "note": "no positive evidence in answer",
   "final": false,
   "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: 未知\n备注: 经联网搜索，未能找到针对该具体型号（含JDWiFi后缀）的拆机评测或明确标注硬件用料的官方/第三方页面，无法确认其具体铜管排数和节流装置类型。"
+ },
+ "kfr35gw/nhpb1bg": {
+  "throttle_type": "电子膨胀阀",
+  "final": false,
+  "answer_excerpt": "搜索词：格力 KFR-35GW/NhPb1BG 拆机 电子膨胀阀 铜管\n搜索词：格力 NhPb1BG 拆机\n搜索词：格力 KFR-35GW/NhPb1BG 参数 换热器 节流装置\n搜索词：KFR-35GW/NhPb1BG 拆机评测\n搜索词：NhPb1BG 拆机\n搜索词：格力NhPb1BG 外机 拆机\n搜索词：KFR-35GW/NhPb1BG 外机重量\n搜索词：格力云锦 NhPb1BG\n搜索词：格力"
+ },
+ "kfr35gw/bpr3aqs1(b1)": {
+  "note": "no positive evidence in answer",
+  "final": false,
+  "answer_excerpt": "好的，我马上为您联网查证奥克斯 KFR-35GW/BpR3AQS1(B1) 空调的硬件用料信息。我将重点搜索拆机评测、商品详情页和厂商参数表。"
+ },
+ "kfr35gw/ca3": {
+  "note": "no positive evidence in answer",
+  "final": false,
+  "answer_excerpt": "好的，我马上为您联网查证空调型号 COLMO KFR-35GW/CA3 的硬件用料信息。"
+ },
+ "kfr72lw/(72567)fnhaf-b1(wifi)": {
+  "coil_rows": "双排",
+  "throttle_type": "电子膨胀阀",
+  "final": false,
+  "answer_excerpt": "搜索中...搜索中...搜索中...搜索中...搜索中...\n搜索结果分析：\n查找关于“KFR-72LW/(72567)FNhAf-B1”或“格力京恬3匹”的拆机评测或详细参数。\n- 在京东等电商平台的商品详情页中，通常不会直接标明铜管排数和节流装置的具体类型，这些多见于专业的家电拆机评测文章（如什么值得买、知乎专栏、B站拆机视频等）。\n- 需要精确匹配该型号的拆机信息。由于“京恬”可能是线上特供"
+ },
+ "kfr50gw/nhke1baj": {
+  "evidence_url": "https://www.gree.com",
+  "final": false,
+  "answer_excerpt": "铜管排数: 未知\n节流装置: 未知\n来源: https://www.gree.com\n备注: 经多方检索，未能找到该具体型号“KFR-50GW/NhKe1BAj"
+ },
+ "kfr35gw/(35587)fnhad-b1": {
+  "throttle_type": "电子膨胀阀",
+  "final": false,
+  "answer_excerpt": "```json\n[{\"name\": \"web_search\", \"arguments\": {\"query\": \"格力 KFR-35GW/(35587)FNhAd-B1 拆机 铜管排数 电子膨胀阀\"}}]\n```"
  }
 }

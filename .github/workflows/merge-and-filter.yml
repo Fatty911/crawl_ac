@@ -3,7 +3,7 @@ name: Merge and Filter
 on:
   workflow_dispatch:
   workflow_run:
-    workflows: ["Crawl ZOL", "Crawl JD", "Crawl PConline"]
+    workflows: ["Crawl ZOL", "Crawl JD", "Crawl PConline", "Crawl Suning"]
     types: [completed]
 
 permissions:

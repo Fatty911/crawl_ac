@@ -63,7 +63,8 @@ def test_merge_only_runs_for_successful_source_completion_or_manual_dispatch():
     _, workflow = load_workflow("merge-and-filter.yml")
     event_config = triggers(workflow)
 
-    assert event_config["workflow_run"]["workflows"] == ["Crawl ZOL", "Crawl JD", "Crawl PConline"]
+    assert event_config["workflow_run"]["workflows"] == [
+        "Crawl ZOL", "Crawl JD", "Crawl PConline", "Crawl Suning"]
     assert event_config["workflow_run"]["types"] == ["completed"]
     assert "workflow_dispatch" in event_config
 

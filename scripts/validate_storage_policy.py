@@ -15,6 +15,7 @@ ARTIFACT_POLICIES = (
     ("pconline-data-", 30),
     ("zol-data-", 30),
     ("jd-data-", 30),
+    ("jd-tower-data-", 30),
     ("suning-data-", 30),
     ("pconline-ai-patch-", 7),
     ("pconline-validation-", 14),

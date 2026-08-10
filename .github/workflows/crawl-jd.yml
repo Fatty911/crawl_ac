@@ -15,12 +15,11 @@ on:
         description: '调试模式（忽略时间窗口）'
         required: false
         default: 'false'
-  schedule:
-    # Scheduled workflows run from the default branch (main).
-    # 03:47 UTC = 11:47 Asia/Shanghai, Tuesday weekly crawl (staggered from ZOL).
-    - cron: "47 3 * * 2"
-    # 05:53 UTC = 13:53 Asia/Shanghai (UTC+8), daily afternoon crawl (staggered).
-    - cron: "53 5 * * *"
+  # schedule 已停用：hotitem 广告位机制（首页/频道页显示随机品类榜）无法发现空调榜，
+  # 旧版爬虫只会抓到三脚架等广告位品类；空调榜入口见 crawl-jd-tower.yml（通天塔 rankId）
+  # schedule:
+  #   - cron: "47 3 * * 2"
+  #   - cron: "53 5 * * *"
 
 permissions:
   contents: write

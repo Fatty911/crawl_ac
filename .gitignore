@@ -16,3 +16,6 @@ scripts/.monitor_count
 scripts/monitor.log
 scripts/monitor_*.log
 crawl_state/
+
+# review evidence (never committed)
+.review-evidence/

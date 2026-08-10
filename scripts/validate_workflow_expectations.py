@@ -12,7 +12,8 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 
-CRAWLER_LONG_RUN = {"crawl-zol.yml", "crawl-jd.yml"}
+# crawl-jd.yml 已废弃（hotitem 广告位无法发现空调榜，见 crawl-jd-tower.yml）
+CRAWLER_LONG_RUN = {"crawl-zol.yml"}
 TRIGGER = "crawl-trigger.yml"
 MERGE = "merge-and-filter.yml"
 AI_MONITOR = "AI_Auto_Fix_Monitor.yml"

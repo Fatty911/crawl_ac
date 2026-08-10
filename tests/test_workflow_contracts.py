@@ -24,20 +24,20 @@ def test_source_schedules_include_staggered_daily_shanghai_afternoon_runs():
             "mapping": "05:23 UTC = 13:23 Asia/Shanghai (UTC+8)",
         },
         "crawl-jd.yml": {
-            "crons": {"47 3 * * 2", "53 5 * * *"},
-            "mapping": "05:53 UTC = 13:53 Asia/Shanghai (UTC+8)",
+            # schedule 已停用（hotitem 广告位无法发现空调榜，见 crawl-jd-tower.yml）
+            "crons": set(),
+            "mapping": "hotitem 广告位机制（首页/频道页显示随机品类榜）无法发现空调榜",
         },
     }
 
     for name, contract in expected.items():
         text, workflow = load_workflow(name)
         event_config = triggers(workflow)
-        crons = {entry["cron"] for entry in event_config["schedule"]}
+        crons = {entry["cron"] for entry in event_config.get("schedule", [])}
 
         assert crons == contract["crons"]
         assert "workflow_dispatch" in event_config
         assert contract["mapping"] in text
-        assert "Scheduled workflows run from the default branch (main)." in text
 
 
 def test_source_workflows_use_independent_non_cancelling_concurrency_groups():

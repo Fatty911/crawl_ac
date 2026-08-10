@@ -1,0 +1,84 @@
+name: Crawl JD Tower
+
+on:
+  workflow_dispatch:
+    inputs:
+      debug_mode:
+        description: "Enable debug logging"
+        required: false
+        default: "false"
+        type: choice
+        options: ["true", "false"]
+  schedule:
+    # 每 6 小时
+    - cron: "0 */6 * * *"
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: crawl-jd-tower
+  cancel-in-progress: false
+
+env:
+  PYTHONUNBUFFERED: "1"
+
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      status: ${{ steps.crawl.outputs.status }}
+      count: ${{ steps.crawl.outputs.count }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Setup proxy runtime
+        env:
+          PROXY_SUBSCRIPTIONS: ${{ secrets.PROXY_SUBSCRIPTIONS }}
+        run: >-
+          python scripts/setup_proxy_runtime.py
+          --require-proxy
+          --test-url
+          https://www.jd.com/
+
+      - name: Crawl JD tongtianta ranking
+        id: crawl
+        env:
+          PROXY_SUBSCRIPTIONS: ${{ secrets.PROXY_SUBSCRIPTIONS }}
+        run: |
+          mkdir -p data/raw/jd/tower
+          # 机场节点对 JD 大多被风控——风控页直接跳过（节点轮换随机碰）
+          # 一直失败也不影响其它源（artifact 缺失时 merge 容忍）
+          python scripts/crawl_jd_tower.py \
+            --output data/raw/jd/tower/latest.json \
+            --time-budget 600 \
+            --delay 3 \
+            --min-records 5 \
+            --rank-ids 687338,3842154,686932,680925,687754,3842156,1883785,687312
+          echo "status=success" >> "$GITHUB_OUTPUT"
+          COUNT=$(python -c "import json; d=json.load(open('data/raw/jd/tower/latest.json')); print(len(d.get('items', [])))")
+          echo "count=$COUNT" >> "$GITHUB_OUTPUT"
+
+      - name: Upload artifact
+        if: steps.crawl.outputs.status == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: jd-tower-data-${{ github.run_id }}
+          path: data/raw/jd/tower/latest.json
+          retention-days: 30
+
+      - name: Trigger merge
+        if: steps.crawl.outputs.status == 'success'
+        run: |
+          gh workflow run merge-and-filter.yml --repo ${{ github.repository }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

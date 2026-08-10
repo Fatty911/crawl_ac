@@ -110,8 +110,12 @@ def find_hotitem_url(session: Any, rotator: Any, delay: float) -> str:
     anchor_pattern = re.compile(
         r"空调排行榜[^<]{0,60}?href=[\"']([^\"']*hotitem[^\"']*)[\"']"
     )
-    # 2) 兜底：页面内任意 hotitem 链接，但必须抓取验证品类（防止广告位/其它品类）
-    any_pattern = re.compile(r"[\"'](/hotitem/[0-9a-f]+\.html)[\"']")
+    # 2) 兜底：页面内任意 hotitem 链接（含无引号/相对路径形式），抓取验证品类
+    any_pattern = re.compile(
+        r"((?:https?:)?//[^\"'\s<>]*?hotitem/[0-9a-f]+\.html"
+        r"|/hotitem/[0-9a-f]+\.html"
+        r"|(?<![A-Za-z0-9])hotitem/[0-9a-f]+\.html)"
+    )
 
     def _normalize(raw: str) -> str:
         if raw.startswith("//"):

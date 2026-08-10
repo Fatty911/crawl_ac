@@ -25,13 +25,16 @@ class TestValidateWorkflowExpectations:
         assert errors == [], f"ZOL workflow check failed: {errors}"
 
     def test_long_running_jd_has_correct_structure(self):
-        """crawl-jd.yml must pass all checks."""
+        """crawl-jd.yml 已废弃（旧 JD 爬虫只抓 hotitem 广告位品类——三脚架/电视；
+        空调榜入口见 crawl-jd-tower.yml 通天塔 rankId）——断言 schedule 确实被停用，
+        防止误恢复定时触发垃圾品类。"""
         errors = []
         path = REPO_ROOT / ".github/workflows/crawl-jd.yml"
         assert path.exists()
-        vwe.check_base_crawler(path, errors)
-        vwe.check_long_running_crawler(path, errors)
-        assert errors == [], f"JD workflow check failed: {errors}"
+        text = path.read_text(encoding="utf-8")
+        # schedule 必须被注释停用
+        assert "  # schedule:" in text, "JD 废弃工作流 schedule 应被注释停用"
+        assert "crawl-jd-tower.yml" in text, "应指向替代的 crawl-jd-tower.yml"
 
     def test_pconline_passes_base_checks(self):
         """crawl-pconline.yml must pass base checks."""

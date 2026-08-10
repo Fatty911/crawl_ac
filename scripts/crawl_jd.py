@@ -89,6 +89,16 @@ def sales_url(hotitem: str, page: int) -> str:
     return f"{JD_HOME}{hotitem}?{urlencode(query)}"
 
 
+def verify_ac_page(page_html: Any) -> bool:
+    """验证 hotitem 页商品确为空调（防三脚架等广告位品类）。"""
+    text = clean_text(page_html.get_text(" ", strip=True))[:2000]
+    ac_hint = ("空调" in text or re.search(r"\d+(?:\.\d+)?匹", text)
+               or re.search(r"(?:KFR|GW|LW|G/W|L/W)", text, re.IGNORECASE))
+    non_ac_hint = ("三脚架" in text or "相机" in text or "镜头" in text
+                   or "耳机" in text or "手机" in text)
+    return bool(ac_hint) and not non_ac_hint
+
+
 def find_hotitem_url(session: Any, rotator: Any, delay: float) -> str:
     """Discover the JD AC sales-ranking hotitem URL from the AC channel."""
     candidates = [
@@ -112,12 +122,7 @@ def find_hotitem_url(session: Any, rotator: Any, delay: float) -> str:
 
     def _verify_ac(page_html: Any) -> bool:
         """验证 hotitem 页商品确为空调（防三脚架等广告位品类）。"""
-        text = clean_text(page_html.get_text(" ", strip=True))[:2000]
-        ac_hint = ("空调" in text or re.search(r"\d+(?:\.\d+)?匹", text)
-                   or re.search(r"(?:KFR|GW|LW|G/W|L/W)", text, re.IGNORECASE))
-        non_ac_hint = ("三脚架" in text or "相机" in text or "镜头" in text
-                       or "耳机" in text or "手机" in text)
-        return bool(ac_hint) and not non_ac_hint
+        return verify_ac_page(page_html)
 
     for url in candidates:
         try:
@@ -252,6 +257,25 @@ def main() -> int:
     state_file = progress_dir / "hotitem_url.txt"
     if not hotitem and state_file.exists():
         hotitem = state_file.read_text(encoding="utf-8").strip()
+    if hotitem and not hotitem.startswith("http"):
+        hotitem = f"{JD_HOME}{hotitem}"
+    # state 里的 URL 可能来自错误探测（如广告位三脚架榜）——复用前验证品类
+    if hotitem:
+        try:
+            if rotator and rotator.enabled:
+                node = rotator.rotate()
+            page, _final_url = get_html(session, hotitem, encoding="utf-8",
+                                        delay=args.delay)
+            if rotator and rotator.enabled and node:
+                rotator.mark_success(node)
+            if not verify_ac_page(page):
+                print(f"stored hotitem is not AC, rediscover: {hotitem}")
+                hotitem = ""
+        except Exception as exc:
+            if rotator and rotator.enabled and node:
+                rotator.mark_failure(node, blocked=True)
+            print(f"stored hotitem verify failed ({type(exc).__name__}), rediscover")
+            hotitem = ""
     if not hotitem:
         if not rotator.enabled:
             print("FAIL: JD requires proxy node rotation; no hotitem URL known")

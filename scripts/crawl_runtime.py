@@ -36,6 +36,7 @@ class Progress:
     scan_complete: bool = False
     processed_ids: list[str] = field(default_factory=list)
     total_items: int = 0
+    current_keyword: int = 0
 
     @classmethod
     def load(cls, progress_dir: Path) -> "Progress":

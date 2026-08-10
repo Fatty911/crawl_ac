@@ -39,7 +39,15 @@ except ModuleNotFoundError:
     from node_rotator import make_rotator
 
 SEARCH_URL = "https://search.suning.com/{keyword}/"
-KEYWORD = "空调"
+# 苏宁"空调"宽泛关键词仅 ~45 独有商品（分页重叠是源站特性），
+# 用多关键词合并扩大覆盖（实测 8 关键词去重 140 独有）
+KEYWORDS = [
+    "空调", "空调挂机", "空调柜机",
+    "格力空调", "美的空调", "海尔空调", "奥克斯空调", "TCL空调",
+    "海信空调", "科龙空调", "长虹空调", "华凌空调", "统帅空调",
+    "小米空调", "米家空调", "COLMO空调", "卡萨帝空调", "云米空调", "追觅空调",
+]
+MAX_KEYWORD_PAGES = 3
 CARDS_SELECTOR = "div.product-box"
 STATE_DIR = "crawl_state/suning"
 
@@ -187,54 +195,63 @@ def main() -> int:
         stable_node = rotator.next_node()
         rotator.switch(stable_node)
         print(f"Suning stable node: {stable_node} (page session pinned)")
-    while not budget.expired():
-        if args.max_pages and page > args.max_pages:
-            break
-        url = SEARCH_URL.format(keyword=urllib.parse.quote(KEYWORD)) + f"?pageNumber={page}"
-        node = stable_node if (rotator.enabled and stable_node) else (rotator.rotate() if rotator.enabled else None)
-        try:
-            html, final_url = get_html(session, url, encoding="gb18030",
-                                       delay=delay)
-            if rotator.enabled and node:
-                rotator.mark_success(node)
-        except Exception as exc:
-            if rotator.enabled and node:
-                rotator.mark_failure(node, blocked=True)
-            print(f"page {page} failed: {type(exc).__name__}")
-            # 稳定节点失败：换新节点继续
-            if rotator.enabled:
-                stable_node = rotator.rotate()
-                rotator.switch(stable_node)
-                print(f"Suning node switched to: {stable_node}")
-                continue
-            break
-        cards = html.select(CARDS_SELECTOR)
-        if not cards:
-            print(f"page {page}: no cards (end of list?)")
-            break
-        page_items = []
-        for index, card in enumerate(cards, start=1):
-            item = parse_card(card, index, page)
-            if not item:
-                continue
-            key = item["source_product_id"]
-            if key in seen:
-                continue
-            seen.add(key)
-            page_items.append(item)
-        print(f"page {page}: +{len(page_items)} items (total {len(all_items) + len(page_items)})")
-        all_items.extend(page_items)
-        progress.current_page = page + 1
-        progress.save(progress_dir)
-        # 超出分页范围时苏宁会重复返回第 1 页（30 卡全 seen）→ 连续 3 页无新增即停
-        if not page_items:
-            consecutive_empty += 1
-            if consecutive_empty >= 3:
-                print(f"3 consecutive empty pages at {page}, stop")
+    keyword_index = progress.current_keyword or 0
+    while keyword_index < len(KEYWORDS):
+        keyword = KEYWORDS[keyword_index]
+        page = 1
+        consecutive_empty = 0
+        while not budget.expired():
+            if args.max_pages and page > args.max_pages:
                 break
-        else:
-            consecutive_empty = 0
-        page += 1
+            if page > MAX_KEYWORD_PAGES:
+                break
+            url = SEARCH_URL.format(keyword=urllib.parse.quote(keyword)) + f"?pageNumber={page}"
+            node = stable_node if (rotator.enabled and stable_node) else (rotator.rotate() if rotator.enabled else None)
+            try:
+                html, final_url = get_html(session, url, encoding="gb18030",
+                                           delay=delay)
+                if rotator.enabled and node:
+                    rotator.mark_success(node)
+            except Exception as exc:
+                if rotator.enabled and node:
+                    rotator.mark_failure(node, blocked=True)
+                print(f"{keyword} page {page} failed: {type(exc).__name__}")
+                # 稳定节点失败：换新节点继续
+                if rotator.enabled:
+                    stable_node = rotator.rotate()
+                    rotator.switch(stable_node)
+                    print(f"Suning node switched to: {stable_node}")
+                    continue
+                break
+            cards = html.select(CARDS_SELECTOR)
+            if not cards:
+                print(f"{keyword} page {page}: no cards (end of list?)")
+                break
+            page_items = []
+            for index, card in enumerate(cards, start=1):
+                item = parse_card(card, index, page)
+                if not item:
+                    continue
+                key = item["source_product_id"]
+                if key in seen:
+                    continue
+                seen.add(key)
+                page_items.append(item)
+            print(f"{keyword} page {page}: +{len(page_items)} items (total {len(all_items) + len(page_items)})")
+            all_items.extend(page_items)
+            progress.current_page = page + 1
+            progress.current_keyword = keyword_index
+            progress.save(progress_dir)
+            # 超出分页范围时苏宁会重复返回第 1 页（30 卡全 seen）→ 连续 3 页无新增即停
+            if not page_items:
+                consecutive_empty += 1
+                if consecutive_empty >= 3:
+                    print(f"3 consecutive empty pages at {keyword} page {page}, next keyword")
+                    break
+            else:
+                consecutive_empty = 0
+            page += 1
+        keyword_index += 1
 
     payload = {
         "schema_version": "1.0",

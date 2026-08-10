@@ -5,9 +5,16 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from collections import Counter
 from pathlib import Path
 from typing import Any
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from merge_data import normalize_model_identity  # noqa: E402
+
+# 同义词候选检测字段（同一 identity 不同源写法差异）
+SYNONYM_FIELDS = ("hp", "energy_grade", "coil_rows", "throttle_type")
 
 
 def load(path: str) -> Any:
@@ -79,6 +86,28 @@ def main() -> int:
     source_combinations = Counter(
         "+".join(row.get("atomic_source_names", [])) for row in items(merged)
     )
+    # 同义词候选：同一 identity（归一后）不同 raw 记录的字段值写法差异——
+    # 供 AI 自发现轮判定（真同义词→沉淀归一规则；真配置差异→忽略）
+    raw_values: dict[str, dict[str, set]] = {}
+    for raw_file in args.raw:
+        for row in items(load(raw_file)):
+            mid = normalize_model_identity(row.get("model") or row.get("title"))
+            if not mid:
+                continue
+            for field in SYNONYM_FIELDS:
+                value = row.get(field)
+                if value not in (None, "", "未知"):
+                    raw_values.setdefault(mid, {}).setdefault(field, set()).add(str(value))
+    synonym_conflicts = []
+    for mid, fields in raw_values.items():
+        for field, values in fields.items():
+            if len(values) > 1:
+                synonym_conflicts.append({
+                    "identity": mid,
+                    "field": field,
+                    "values": sorted(values),
+                })
+    synonym_conflicts.sort(key=lambda c: (c["field"], c["identity"]))
     report = {
         "raw": raw_summaries,
         "published_count": len(items(merged)),
@@ -88,6 +117,7 @@ def main() -> int:
         ),
         "source_combinations": dict(sorted(source_combinations.items())),
         "rejection_reasons": dict(rejection_reasons.most_common()),
+        "synonym_conflicts": synonym_conflicts,
     }
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)

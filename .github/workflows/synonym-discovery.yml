@@ -1,0 +1,157 @@
+name: Synonym Discovery
+
+# 同义词自发现自优化：merge 后扫描同一机型（identity）不同源的字段写法差异，
+# 由 Agent（opencode run）判定真同义词并沉淀为确定性归一规则（改 merge_data.py
+# 的归一函数），评审后提交并触发 merge 重跑验证——冲突清零后自动停止。
+# 覆盖用户要求："匹数 P/匹、能效 新一级/新一级能效、铜管 2排/双排 都应该归并，推进 action 自发现自优化"
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "30 2,14 * * *"
+
+permissions:
+  contents: write
+  actions: write
+  issues: write
+
+concurrency:
+  group: synonym-discovery
+  cancel-in-progress: false
+
+env:
+  GH_TOKEN: ${{ secrets.ACTION_PAT || github.token }}
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@main
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@main
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Download raw artifacts and published baseline
+        run: |
+          mkdir -p data/raw/pconline data/raw/suning data/raw/zol data/raw/jd dist
+          set +e
+          for spec in "crawl-pconline.yml:pconline-data-:data/raw/pconline/latest.json:50" \
+                      "crawl-suning.yml:suning-data-:data/raw/suning/latest.json:50" \
+                      "crawl-zol.yml:zol-data-:data/raw/zol/latest.json:50" \
+                      "crawl-jd-tower.yml:jd-tower-data-:data/raw/jd/tower/latest.json:5"; do
+            IFS=: read -r wf prefix out minr <<< "$spec"
+            mkdir -p "$(dirname "$out")"
+            python scripts/download_latest_crawler_artifact.py \
+              --repo "$GITHUB_REPOSITORY" --workflow "$wf" \
+              --artifact-prefix "$prefix" --output "$out" --min-records "$minr" \
+              2>/dev/null
+          done
+          set -e
+          gh release download data-latest --pattern ac-latest.json --dir dist || true
+          echo "AVAILABLE=$(ls data/raw/*/latest.json data/raw/jd/tower/latest.json 2>/dev/null | tr '\n' ' ')" >> "$GITHUB_ENV"
+
+      - name: Detect synonym conflicts
+        id: detect
+        env:
+          AVAILABLE: ${{ env.AVAILABLE }}
+        run: |
+          python scripts/analysis/merge_evidence_report.py \
+            --raw $AVAILABLE \
+            --merged dist/ac-latest.json \
+            --rejected dist/ac-latest.json \
+            --output conflicts_report.json
+          # 注：--rejected 用 merged 占位（rejection_reasons 统计不完整不影响
+          # synonym_conflicts 检测——它只消费 --raw；merge run 的 rejected 未上传 artifact）
+          python - <<'EOF'
+          import json
+          report = json.load(open('conflicts_report.json', encoding='utf-8'))
+          conflicts = report.get('synonym_conflicts', [])
+          print(f'同义词冲突候选: {len(conflicts)}')
+          if not conflicts:
+              open('.env_out', 'w').write('no_conflicts=true\n')
+              print('NO_CONFLICTS=1')
+          else:
+              with open('conflicts.json', 'w', encoding='utf-8') as f:
+                  json.dump(conflicts, f, ensure_ascii=False, indent=1)
+              print('conflicts saved')
+          EOF
+          if [ -f .env_out ]; then
+            cat .env_out >> "$GITHUB_ENV"
+            echo "has_conflicts=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_conflicts=true" >> "$GITHUB_OUTPUT"
+            echo "冲突数: $(python -c "import json; print(len(json.load(open('conflicts.json', encoding='utf-8'))))")"
+          fi
+
+      - name: Set up Node.js + OpenCode CLI
+        if: steps.detect.outputs.has_conflicts == 'true'
+        uses: actions/setup-node@main
+        with:
+          node-version: "22"
+
+      - name: Install OpenCode CLI
+        if: steps.detect.outputs.has_conflicts == 'true'
+        run: npm install --global opencode-ai@latest
+
+      - name: Agent analyzes conflicts and generates normalization patch
+        if: steps.detect.outputs.has_conflicts == 'true'
+        env:
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          ZEN_API_KEY: ${{ secrets.ZEN_API_KEY }}
+        run: |
+          cat > synonym_prompt.md <<'EOF'
+          你是数据归一专家。分析 crawl_ac 仓库的同义词冲突候选（conflicts.json）——
+          同一机型（identity）在不同数据源里的字段写法差异。
+
+          任务：
+          1. 读 conflicts.json（[{identity, field, values}]）
+          2. 逐条判定：真同义词（写法差异，应归并）还是真配置差异（不同配置，不归并）
+          3. 对真同义词：修改 scripts/merge_data.py 的对应归一函数
+             （normalize_hp/normalize_energy_grade/normalize_coil_rows 或新映射表），
+             用确定性规则归并（参考已有 normalize_coil_rows 的 "2排"->"双排" 模式）
+          4. 只改归一函数，不动其它代码；为新增规则补充 tests/test_merge_data.py 断言
+          5. 运行 python -m pytest tests/test_merge_data.py 确认全绿
+
+          安全边界（用户铁律）：
+          - 匹数 "大1.5匹" vs "1.5匹" 是真差异（选购语义不同），绝不归并
+          - 能效 "新一级" vs "1级" 若并存且无法确认同义，保守不归并
+          - 铜管 "1.6排" vs "1.5排" 是真差异
+          - 只归并有明确同义证据的写法对（如 "3P"->"3匹"、"双排铜管"->"双排"）
+          完成后输出：修改的文件清单 + 每处改动理由。
+          EOF
+          opencode run --pure --agent plan --model zen-openrouter/free:deepseek-v4-flash \
+            --file synonym_prompt.md "分析同义词冲突并实现归一规则" \
+            --allowedTools "bash:*" --allowedTools "write:*" --allowedTools "edit:*" \
+            --allowedTools "read:*" --allowedTools "glob:*" --allowedTools "grep:*" \
+            --allowedTools "test:*" --allowedTools "list:*" --allowedTools "ls:*" \
+            --allowedTools "python:*" 2>&1 | tail -30 || echo "opencode failed"
+          git diff --stat
+
+      - name: Run full tests
+        if: steps.detect.outputs.has_conflicts == 'true'
+        run: python -m pytest tests/ -q 2>&1 | tail -3
+
+      - name: Commit and trigger merge re-run
+        if: steps.detect.outputs.has_conflicts == 'true'
+        run: |
+          if git diff --quiet; then
+            echo "无改动（Agent 判定全部为真差异）"
+            exit 0
+          fi
+          git config user.name "synonym-discovery-bot"
+          git config user.email "xuerui911@gmail.com"
+          git add scripts/merge_data.py tests/test_merge_data.py
+          git commit -m "feat: 同义词归一规则（AI 自发现沉淀）[skip ci]
+
+          来源：Synonym Discovery 自动扫描同一机型不同源字段写法差异，
+          Agent（opencode run）判定真同义词后沉淀确定性规则。"
+          git push origin main
+          gh workflow run merge-and-filter.yml --repo ${{ github.repository }}

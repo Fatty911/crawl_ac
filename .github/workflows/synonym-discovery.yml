@@ -135,7 +135,7 @@ jobs:
         # pin 1.18.11：@latest 新版 CLI 移除 --agent plan 参数（crawl_laptops 同坑）
         run: npm install --global opencode-ai@1.18.11
 
-      - name: Agent analyzes conflicts and generates normalization patch
+      - name: Agent judges synonym patterns (single-shot JSON)
         if: steps.detect.outputs.has_conflicts == 'true'
         env:
           VOLCENGINE_AGENT_PLAN_API_KEY: ${{ secrets.VOLCENGINE_AGENT_PLAN_API_KEY }}
@@ -147,35 +147,31 @@ jobs:
           export OPENCODE_CONFIG_CONTENT="$(cat opencode_config.json)"
           cat > synonym_prompt.md <<'EOF'
           你是数据归一专家。分析 crawl_ac 仓库的同义词冲突候选（conflicts.json）——
-          每个候选是一条模式：{field, values, examples, model_count}——同一机型
-          （examples 里的型号）在不同数据源里该字段的写法差异。
+          每个候选是一条模式：{field, values, examples, model_count}。
 
-          任务：
-          1. 读 conflicts.json
-          2. 逐条判定：真同义词（写法差异，应归并）还是真配置差异/解析错误（不归并）
-          3. 对真同义词：修改 scripts/merge_data.py 的对应归一函数
-             （normalize_hp/normalize_energy_grade/normalize_coil_rows 或新映射表），
-             用确定性规则归并（参考已有 normalize_coil_rows 的 "2排"->"双排" 模式）
-          4. 只改归一函数，不动其它代码；为新增规则补充 tests/test_merge_data.py 断言
-          5. 运行 python -m pytest tests/test_merge_data.py 确认全绿
-          6. 最多处理 8 个模式；不确定的保守跳过（宁缺毋滥）
+          对每条模式判定并输出严格 JSON（不要输出其它内容）：
+          {"decisions":[{"field":"hp","values":["3.0P","3P"],"decision":"merge","canonical":"3匹","rule":"末尾 P/匹 统一为匹；3.0P->3匹","confidence":0.95},{"field":"hp","values":["1.5匹","大1.5匹"],"decision":"skip","reason":"真差异：大1.5匹 选购语义不同","confidence":0.9}]}
 
-          安全边界（用户铁律）：
-          - 匹数 "大1.5匹" vs "1.5匹" 是真差异（选购语义不同），绝不归并
-          - 能效 "1级" vs "3级" 是真差异（不同能效版本），绝不归并
-          - "1级" vs "新一级"：若同一机型同源参数一致仅为写法差异才归并，否则保守不归并
-          - "370匹" 之类明显解析错误（e370pro-x1 的 370 匹）不是同义词，忽略（属爬虫解析问题）
-          - 只归并有明确同义证据的写法对（如 "3P"->"3匹"、"双排铜管"->"双排"）
-          完成后输出：修改的文件清单 + 每处改动理由。
+          判定规则：
+          - decision=merge：写法差异同义词，给出 canonical（归并后值）+ rule（确定性规则描述）
+          - decision=skip：真配置差异或解析错误（如 370匹、大X匹 vs X匹、1级 vs 3级）
+          - 只对明确同义的归并（3P/3.0P->3匹、双排铜管->双排、新一级能效->新一级）
+          - "1级" vs "新一级"：无法确认同源同参时保守 skip
+          - 宁缺毋滥：不确定一律 skip
           EOF
-          opencode run --pure --agent build --model volcengine-agentplan/deepseek-v4-flash \
-            "分析同义词冲突并实现归一规则" --file synonym_prompt.md \
-            2>&1 | tail -40
-          # opencode 失败必须让 run 失败（不能静默吞错假装"无改动"）
+          opencode run --pure --agent plan --model volcengine-agentplan/deepseek-v4-flash \
+            "判定同义词模式并输出 JSON 决策" --file synonym_prompt.md --file conflicts.json \
+            2>&1 | tail -30 > agent_output.txt
           if [ "${PIPESTATUS[0]}" -ne 0 ]; then
-            echo "::error::opencode Agent 分析失败"
+            echo "::error::opencode Agent 判定失败"
             exit 1
           fi
+          cat agent_output.txt
+
+      - name: Apply normalization rules deterministically
+        if: steps.detect.outputs.has_conflicts == 'true'
+        run: |
+          python scripts/synonym_apply_rules.py agent_output.txt
           git diff --stat
 
       - name: Run full tests

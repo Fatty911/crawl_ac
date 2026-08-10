@@ -140,17 +140,18 @@ jobs:
         env:
           VOLCENGINE_AGENT_PLAN_API_KEY: ${{ secrets.VOLCENGINE_AGENT_PLAN_API_KEY }}
         run: |
-          # 火山 AgentPlan provider 配置（JSON 严格，禁止 YAML 折叠）
+          # 火山 AgentPlan provider 配置（JSON 严格，禁止 YAML 折叠）；
+          # 判定用 kimi-k3（快模型；deepseek-v4-flash 首响应 30-40 分钟超时）
           cat > opencode_config.json <<'EOF'
-          {"provider":{"volcengine-agentplan":{"npm":"@ai-sdk/openai-compatible","options":{"baseURL":"https://ark.cn-beijing.volces.com/api/plan/v3","apiKey":"{env:VOLCENGINE_AGENT_PLAN_API_KEY}"},"models":{"deepseek-v4-flash":{"name":"DeepSeek V4 Flash (AgentPlan)"}}}},"model":"volcengine-agentplan/deepseek-v4-flash","permission":{"edit":"allow","bash":"allow"}}
+          {"provider":{"volcengine-agentplan":{"npm":"@ai-sdk/openai-compatible","options":{"baseURL":"https://ark.cn-beijing.volces.com/api/plan/v3","apiKey":"{env:VOLCENGINE_AGENT_PLAN_API_KEY}"},"models":{"kimi-k3":{"name":"Kimi K3 (AgentPlan)"}}}},"model":"volcengine-agentplan/kimi-k3","permission":{"edit":"allow","bash":"allow"}}
           EOF
           export OPENCODE_CONFIG_CONTENT="$(cat opencode_config.json)"
           cat > synonym_prompt.md <<'EOF'
           你是数据归一专家。分析 crawl_ac 仓库的同义词冲突候选（conflicts.json）——
           每个候选是一条模式：{field, values, examples, model_count}。
 
-          对每条模式判定并输出严格 JSON（不要输出其它内容）：
-          {"decisions":[{"field":"hp","values":["3.0P","3P"],"decision":"merge","canonical":"3匹","rule":"末尾 P/匹 统一为匹；3.0P->3匹","confidence":0.95},{"field":"hp","values":["1.5匹","大1.5匹"],"decision":"skip","reason":"真差异：大1.5匹 选购语义不同","confidence":0.9}]}
+          对每条模式判定并输出严格 JSON（不要输出其它内容，禁止复述示例——只输出真实判定）：
+          {"decisions":[{"field":"<字段>","values":["<写法1>","<写法2>"],"decision":"merge|skip","canonical":"<归并后值，skip 时省略>","rule":"<确定性规则描述>","confidence":0.0-1.0}]}
 
           判定规则：
           - decision=merge：写法差异同义词，给出 canonical（归并后值）+ rule（确定性规则描述）
@@ -159,14 +160,16 @@ jobs:
           - "1级" vs "新一级"：无法确认同源同参时保守 skip
           - 宁缺毋滥：不确定一律 skip
           EOF
-          opencode run --pure --agent plan --model volcengine-agentplan/deepseek-v4-flash \
+          # timeout 600 保护：opencode 进程输出后可能悬挂（已知行为）
+          timeout 600 opencode run --pure --agent plan --model volcengine-agentplan/kimi-k3 \
             "判定同义词模式并输出 JSON 决策" --file synonym_prompt.md --file conflicts.json \
-            2>&1 | tail -30 > agent_output.txt
-          if [ "${PIPESTATUS[0]}" -ne 0 ]; then
-            echo "::error::opencode Agent 判定失败"
+            --print-logs > agent_output.txt 2>&1
+          OC_EXIT=$?
+          if [ "$OC_EXIT" -ne 0 ] && [ "$OC_EXIT" -ne 124 ]; then
+            echo "::error::opencode Agent 判定失败 (exit $OC_EXIT)"
             exit 1
           fi
-          cat agent_output.txt
+          tail -40 agent_output.txt
 
       - name: Apply normalization rules deterministically
         if: steps.detect.outputs.has_conflicts == 'true'

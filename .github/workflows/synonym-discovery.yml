@@ -160,8 +160,8 @@ jobs:
           - "1级" vs "新一级"：无法确认同源同参时保守 skip
           - 宁缺毋滥：不确定一律 skip
           EOF
-          # timeout 600 保护：opencode 进程输出后可能悬挂（已知行为）
-          timeout 600 opencode run --pure --agent plan --model volcengine-agentplan/kimi-k3 \
+          # timeout 900 保护：opencode 进程输出后可能悬挂（已知行为）
+          timeout 900 opencode run --pure --agent build --model volcengine-agentplan/kimi-k3 \
             "判定同义词模式并输出 JSON 决策" --file synonym_prompt.md --file conflicts.json \
             --print-logs > agent_output.txt 2>&1
           OC_EXIT=$?
@@ -174,7 +174,12 @@ jobs:
       - name: Apply normalization rules deterministically
         if: steps.detect.outputs.has_conflicts == 'true'
         run: |
-          python scripts/synonym_apply_rules.py agent_output.txt
+          # build agent 可能已直接改好 merge_data.py；未改则用 JSON 判定确定性应用
+          if git diff --quiet -- scripts/merge_data.py tests/test_merge_data.py; then
+            python scripts/synonym_apply_rules.py agent_output.txt
+          else
+            echo "build agent 已直接修改，跳过确定性应用"
+          fi
           git diff --stat
 
       - name: Run full tests

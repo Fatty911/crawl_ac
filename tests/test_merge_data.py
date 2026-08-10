@@ -42,6 +42,11 @@ class TestNormalizeModelIdentity:
         assert normalize_model_identity("格力KFR-35GW/(35505)FNhAj-B1") == "kfr35gw/(35505)fnhaj"
         assert normalize_model_identity("格力KFR-35GW/(35504)FNhAj-B1") != normalize_model_identity("格力KFR-35GW/(35505)FNhAj-B1")
 
+
+    def test_synonym_map(self):
+        # Synonym Discovery 自发现沉淀的归并规则
+        from merge_data import normalize_energy_grade
+        assert normalize_energy_grade("一级能效") == "新一级"
     def test_b1_suffix_normalized(self):
         # 同一机型不同源写法差异：末尾 (B1)/+B1/-B1 能效后缀归一
         assert normalize_model_identity("奥克斯KFR-35GW/BpR3AQD600(B1)") == "kfr35gw/bpr3aqd600"
@@ -210,7 +215,7 @@ class TestValueNormalization:
         from merge_data import normalize_energy_grade
         assert normalize_energy_grade("新一级能效") == "新一级"
         assert normalize_energy_grade("新一级") == "新一级"
-        assert normalize_energy_grade("1级") == "1级"
+        assert normalize_energy_grade("1级") == "新一级"  # Synonym Discovery: PConline 简写=新国标新一级
 
     def test_normalize_coil_rows(self):
         from merge_data import normalize_coil_rows

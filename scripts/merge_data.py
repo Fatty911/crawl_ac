@@ -146,6 +146,16 @@ BRAND_ALIASES = {
 }
 
 
+# AI 自发现沉淀的同义词映射（Synonym Discovery workflow 写入，勿手改）
+SYNONYM_MAPS: dict[str, dict[str, str]] = {
+    "energy_grade": {
+        "1级": "新一级",
+        "一级能效": "新一级",
+        "新一级能效": "新一级",
+    },
+}
+
+
 def normalize_hp(value: Any) -> str:
     """归并匹数写法：'1.5P'->'1.5匹'、'3.0P'->'3匹'、'大1.0P'->'大1匹'。
 
@@ -170,6 +180,8 @@ def normalize_hp(value: Any) -> str:
 
 
 def normalize_energy_grade(value: Any) -> str:
+    if _clean(value) in SYNONYM_MAPS.get("energy_grade", {}):
+        return SYNONYM_MAPS["energy_grade"][_clean(value)]
     """归并能效等级写法：'新一级能效'->'新一级'（用户归并要求）。"""
     text = _clean(value)
     if text == "新一级能效":

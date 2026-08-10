@@ -22,6 +22,7 @@ import json
 import subprocess
 import time
 import re
+import shutil
 from pathlib import Path
 from typing import List, Tuple, Dict, Optional
 
@@ -198,8 +199,22 @@ class SyntaxValidator:
     def validate_shell(self, file_path: Path) -> Tuple[bool, str]:
         """验证 Shell 脚本语法"""
         try:
+            # Windows 上 python 的 `bash` 可能解析到 WSL bash（System32\bash.exe，
+            # 看的是 Linux /tmp，找不到 Windows 文件）——显式用 Git 的 MSYS bash。
+            # CI（ubuntu）无此问题，用系统 bash。
+            git_bash = Path(r"C:\Program Files\Git\bin\bash.exe")
+            git_bash_x86 = Path(r"C:\Program Files (x86)\Git\bin\bash.exe")
+            if git_bash.exists():
+                bash = str(git_bash)
+            elif git_bash_x86.exists():
+                bash = str(git_bash_x86)
+            else:
+                bash = shutil.which("bash") or "bash"
+            # MSYS bash 不认 Windows 反斜杠路径（C:\Users\... 会被吞成 C:Users...），
+            # 统一转正斜杠（bash 接受 C:/Users/...）
+            path_arg = str(file_path).replace("\\", "/")
             result = subprocess.run(
-                ["bash", "-n", str(file_path)],
+                [bash, "-n", path_arg],
                 capture_output=True, text=True, timeout=10
             )
             if result.returncode == 0:

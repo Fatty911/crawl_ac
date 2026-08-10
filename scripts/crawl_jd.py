@@ -83,7 +83,10 @@ def sales_url(hotitem: str, page: int) -> str:
         "sort_type": "sort_totalsales15_desc",
         "page": str(page),
     }
-    return f"{hotitem}?{urlencode(query)}"
+    # find_hotitem_url 可能返回相对路径（如 "hotitem/xxx.html"），补全域名
+    if hotitem.startswith("http"):
+        return f"{hotitem}?{urlencode(query)}"
+    return f"{JD_HOME}{hotitem}?{urlencode(query)}"
 
 
 def find_hotitem_url(session: Any, rotator: Any, delay: float) -> str:

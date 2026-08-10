@@ -8,6 +8,11 @@ import argparse
 import json
 import sys
 from pathlib import Path
+
+try:
+    from scripts.merge_data import tier_apf_floor
+except ModuleNotFoundError:
+    from merge_data import tier_apf_floor
 from typing import Any
 
 REQUIRED_ITEM_FIELDS = (
@@ -55,7 +60,7 @@ def audit_payload(payload: dict[str, Any], baseline: dict[str, Any] | None = Non
         if apf_value is None:
             errors.append(f"{label}: missing apf")
         else:
-            floor = 4.2 if "柜" in ac_type else 5.0
+            floor = tier_apf_floor(ac_type, item.get("hp"))
             if apf_value < floor:
                 errors.append(f"{label}: apf {apf_value} < floor {floor}")
         for name in ("throttle_type", "coil_rows"):

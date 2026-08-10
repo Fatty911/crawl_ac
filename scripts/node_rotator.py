@@ -70,7 +70,11 @@ class NodeRotator:
                 return []
             data = resp.json()
             self._nodes = [str(name) for name in data.get("all", [])]
-            self._nodes = [n for n in self._nodes if n != self.group]
+            # 排除代理组自身与常见子组名（all 列表含组名，如 BALANCE/PROXY——
+            # 切到组名会让 mihomo 走 round-robin，稳定节点模式失效）
+            excluded = {self.group, "BALANCE", "PROXY", "REJECT", "DIRECT",
+                        "GLOBAL", "MATCH", "FINAL"}
+            self._nodes = [n for n in self._nodes if n not in excluded]
         except (requests.RequestException, ValueError):
             self._nodes = []
         self._enabled = bool(self._nodes)

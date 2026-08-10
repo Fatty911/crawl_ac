@@ -109,7 +109,7 @@ jobs:
         run: |
           # 火山 AgentPlan provider 配置（JSON 严格，禁止 YAML 折叠）
           cat > opencode_config.json <<'EOF'
-          {"provider":{"volcengine-agentplan":{"npm":"@ai-sdk/openai-compatible","options":{"baseURL":"https://ark.cn-beijing.volces.com/api/plan/v3","apiKey":"{env:VOLCENGINE_AGENT_PLAN_API_KEY}"},"models":{"deepseek-v4-flash":{"name":"DeepSeek V4 Flash (AgentPlan)"}}}},"model":"volcengine-agentplan/deepseek-v4-flash","permission":{"edit":true,"bash":true}}
+          {"provider":{"volcengine-agentplan":{"npm":"@ai-sdk/openai-compatible","options":{"baseURL":"https://ark.cn-beijing.volces.com/api/plan/v3","apiKey":"{env:VOLCENGINE_AGENT_PLAN_API_KEY}"},"models":{"deepseek-v4-flash":{"name":"DeepSeek V4 Flash (AgentPlan)"}}}},"model":"volcengine-agentplan/deepseek-v4-flash","permission":{"edit":"allow","bash":"allow"}}
           EOF
           export OPENCODE_CONFIG_CONTENT="$(cat opencode_config.json)"
           cat > synonym_prompt.md <<'EOF'

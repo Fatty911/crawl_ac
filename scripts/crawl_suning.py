@@ -180,21 +180,33 @@ def main() -> int:
 
     page = progress.current_page or 1
     consecutive_empty = 0
+    # 苏宁分页按出站 IP 区分访客：节点轮换会被当新会话返回热门首屏（实测 page2+ 大量重复）。
+    # 采用稳定节点分页：锁定一个节点爬完整页序列，失败才轮换。
+    stable_node = None
+    if rotator.enabled:
+        stable_node = rotator.next_node()
+        rotator.switch(stable_node)
+        print(f"Suning stable node: {stable_node} (page session pinned)")
     while not budget.expired():
         if args.max_pages and page > args.max_pages:
             break
         url = SEARCH_URL.format(keyword=urllib.parse.quote(KEYWORD)) + f"?pageNumber={page}"
+        node = stable_node if (rotator.enabled and stable_node) else (rotator.rotate() if rotator.enabled else None)
         try:
-            if rotator and rotator.enabled:
-                node = rotator.rotate()
             html, final_url = get_html(session, url, encoding="gb18030",
                                        delay=delay)
-            if rotator and rotator.enabled and node:
+            if rotator.enabled and node:
                 rotator.mark_success(node)
         except Exception as exc:
-            if rotator and rotator.enabled and node:
+            if rotator.enabled and node:
                 rotator.mark_failure(node, blocked=True)
             print(f"page {page} failed: {type(exc).__name__}")
+            # 稳定节点失败：换新节点继续
+            if rotator.enabled:
+                stable_node = rotator.rotate()
+                rotator.switch(stable_node)
+                print(f"Suning node switched to: {stable_node}")
+                continue
             break
         cards = html.select(CARDS_SELECTOR)
         if not cards:

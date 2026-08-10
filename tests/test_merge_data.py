@@ -38,9 +38,18 @@ class TestNormalizeModelIdentity:
 
     def test_paren_variant_kept(self):
         # 格力带括号内部代号：不同机型不得错误合并
-        assert normalize_model_identity("格力KFR-35GW/(35504)FNhAj-B1") == "kfr35gw/(35504)fnhaj-b1"
-        assert normalize_model_identity("格力KFR-35GW/(35505)FNhAj-B1") == "kfr35gw/(35505)fnhaj-b1"
+        assert normalize_model_identity("格力KFR-35GW/(35504)FNhAj-B1") == "kfr35gw/(35504)fnhaj"
+        assert normalize_model_identity("格力KFR-35GW/(35505)FNhAj-B1") == "kfr35gw/(35505)fnhaj"
         assert normalize_model_identity("格力KFR-35GW/(35504)FNhAj-B1") != normalize_model_identity("格力KFR-35GW/(35505)FNhAj-B1")
+
+    def test_b1_suffix_normalized(self):
+        # 同一机型不同源写法差异：末尾 (B1)/+B1/-B1 能效后缀归一
+        assert normalize_model_identity("奥克斯KFR-35GW/BpR3AQD600(B1)") == "kfr35gw/bpr3aqd600"
+        assert normalize_model_identity("TCL KFR-35GW/JD21+B1") == "kfr35gw/jd21"
+        assert normalize_model_identity("美的KFR-35GW/FNhAa-B1") == "kfr35gw/fnhaa"
+        # B 系不误伤：非末尾 B 保留、A 系能效版本不归一（保守）
+        assert normalize_model_identity("格力KFR-72LW/NhGh3B") == "kfr72lw/nhgh3b"
+        assert normalize_model_identity("格力KFR-35GW/(35504)FNhAj-A3") == "kfr35gw/(35504)fnhaj-a3"
 
 
 class TestParseHelpers:

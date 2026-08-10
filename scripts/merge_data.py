@@ -90,6 +90,10 @@ def normalize_model_identity(text: Any) -> str:
     suffix = re.sub(r"\s+", "", (match.group(3) or "").upper())
     variant = re.sub(r"[\s_\-]+", "-", (match.group(4) or "").upper())
     variant = variant.strip("-")
+    # 末尾能效后缀归一：同一机型不同源写法差异（如奥克斯 BpR3AQD600(B1) vs BpR3AQD600、
+    # JD21+B1 vs JD21）——(B1)/(B2)/+B1/-B1 是能效等级代码，不改变机型身份。
+    # 注意：不处理括号内产品代号（如格力 KFR-50LW/(50504)FNhAa-B1 的 (50504) 必须保留）
+    variant = re.sub(r"[\s+\-(]*B[1-3][)\s\-]*$", "", variant)
     identity = f"{head}{capacity}{suffix}/{variant}".lower()
     return identity
 

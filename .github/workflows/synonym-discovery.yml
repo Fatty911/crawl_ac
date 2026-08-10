@@ -99,7 +99,8 @@ jobs:
 
       - name: Install OpenCode CLI
         if: steps.detect.outputs.has_conflicts == 'true'
-        run: npm install --global opencode-ai@latest
+        # pin 1.18.11：@latest 新版 CLI 移除 --agent plan 参数（crawl_laptops 同坑）
+        run: npm install --global opencode-ai@1.18.11
 
       - name: Agent analyzes conflicts and generates normalization patch
         if: steps.detect.outputs.has_conflicts == 'true'

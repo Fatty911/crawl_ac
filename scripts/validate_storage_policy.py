@@ -18,6 +18,7 @@ ARTIFACT_POLICIES = (
     ("jd-tower-data-", 30),
     ("synonym-conflicts-", 7),
     ("suning-data-", 30),
+    ("leader-data-", 30),
     ("pconline-ai-patch-", 7),
     ("pconline-validation-", 14),
     ("pconline-review-", 14),

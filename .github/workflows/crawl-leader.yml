@@ -1,0 +1,77 @@
+name: Crawl Leader
+
+on:
+  workflow_dispatch:
+    inputs:
+      debug_mode:
+        description: "Enable debug logging"
+        required: false
+        default: "false"
+        type: choice
+        options: ["true", "false"]
+  schedule:
+    - cron: "30 1 * * *"
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: crawl-leader
+  cancel-in-progress: false
+
+env:
+  PYTHONUNBUFFERED: "1"
+
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      status: ${{ steps.crawl.outputs.status }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Setup proxy runtime
+        env:
+          PROXY_SUBSCRIPTIONS: ${{ secrets.PROXY_SUBSCRIPTIONS }}
+        run: >-
+          python scripts/setup_proxy_runtime.py
+          --require-proxy
+          --test-url
+          https://www.leader.com.cn/air-conditioners/
+
+      - name: Crawl Leader official site
+        id: crawl
+        run: |
+          mkdir -p data/raw/leader
+          python scripts/crawl_leader.py \
+            --output data/raw/leader/latest.json \
+            --time-budget 600 \
+            --delay 0.8 \
+            --min-records 5
+          echo "status=success" >> "$GITHUB_OUTPUT"
+          COUNT=$(python -c "import json; d=json.load(open('data/raw/leader/latest.json')); print(len(d.get('items', [])))")
+          echo "count=$COUNT" >> "$GITHUB_OUTPUT"
+
+      - name: Upload artifact
+        if: steps.crawl.outputs.status == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: leader-data-${{ github.run_id }}
+          path: data/raw/leader/latest.json
+          retention-days: 30
+
+      - name: Trigger merge
+        if: steps.crawl.outputs.status == 'success'
+        run: |
+          gh workflow run merge-and-filter.yml --repo ${{ github.repository }}
+        env:
+          GH_TOKEN: ${{ secrets.ACTION_PAT || github.token }}

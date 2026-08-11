@@ -46,7 +46,7 @@ jobs:
       - name: Download latest complete crawler artifacts
         id: artifacts
         run: |
-          mkdir -p data/raw/pconline data/raw/zol data/raw/jd data/raw/jd/tower data/raw/suning
+          mkdir -p data/raw/pconline data/raw/zol data/raw/jd data/raw/jd/tower data/raw/suning data/raw/leader
           echo "skip=false" >> "$GITHUB_OUTPUT"
           set +e
           python scripts/download_latest_crawler_artifact.py \
@@ -75,6 +75,9 @@ jobs:
           jd_status=$?
           python scripts/download_latest_crawler_artifact.py             --repo "$GITHUB_REPOSITORY"             --workflow crawl-suning.yml             --artifact-prefix suning-data-             --output data/raw/suning/latest.json             --min-records 50             2> >(tee "$RUNNER_TEMP/suning-artifact.err" >&2)
           suning_status=$?
+          leader_status=0
+          python scripts/download_latest_crawler_artifact.py             --repo "$GITHUB_REPOSITORY"             --workflow crawl-leader.yml             --artifact-prefix leader-data-             --output data/raw/leader/latest.json             --min-records 5             2> >(tee "$RUNNER_TEMP/leader-artifact.err" >&2)
+          leader_status=$?
           jd_tower_status=0
           python scripts/download_latest_crawler_artifact.py \
             --repo "$GITHUB_REPOSITORY" \
@@ -104,6 +107,7 @@ jobs:
           if [ "$zol_status" -eq 0 ]; then AVAILABLE="$AVAILABLE data/raw/zol/latest.json"; fi
           if [ "$jd_status" -eq 0 ]; then AVAILABLE="$AVAILABLE data/raw/jd/latest.json"; fi
           if [ "$jd_tower_status" -eq 0 ]; then AVAILABLE="$AVAILABLE data/raw/jd/tower/latest.json"; fi
+          if [ "$leader_status" -eq 0 ]; then AVAILABLE="$AVAILABLE data/raw/leader/latest.json"; fi
           if [ "$suning_status" -eq 0 ]; then AVAILABLE="$AVAILABLE data/raw/suning/latest.json"; fi
           echo "AVAILABLE_ARTIFACTS=$AVAILABLE" >> "$GITHUB_ENV"
 

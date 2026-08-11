@@ -362,7 +362,12 @@ def main() -> int:
     if len(rows_by_source) < 1:
         print("FAIL: no usable source artifacts")
         return 2
+    # 官方源（Leader/Gree 等官网）数据量天然少（官网在售产品数有限），
+    # 豁免 min-source-records——它们的价值是官方一手参数佐证
+    OFFICIAL_SOURCES = {"Leader", "Gree"}
     for source, items in rows_by_source.items():
+        if source in OFFICIAL_SOURCES:
+            continue
         if len(items) < args.min_source_records:
             print(f"FAIL: {source} only {len(items)} records "
                   f"(< {args.min_source_records})")

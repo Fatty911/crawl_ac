@@ -124,6 +124,17 @@ jobs:
             echo "冲突数: $(python -c "import json; print(len(json.load(open('conflicts.json', encoding='utf-8'))))")"
           fi
 
+      - name: Set up Node.js + OpenCode CLI
+        if: steps.detect.outputs.has_conflicts == 'true'
+        uses: actions/setup-node@main
+        with:
+          node-version: "22"
+
+      - name: Install OpenCode CLI
+        if: steps.detect.outputs.has_conflicts == 'true'
+        # pin 1.18.11：@latest 新版 CLI 移除 --agent plan 参数（crawl_laptops 同坑）
+        run: npm install --global opencode-ai@1.18.11
+
       - name: Agent judges synonym patterns (single-shot JSON)
         if: steps.detect.outputs.has_conflicts == 'true'
         env:
@@ -139,7 +150,8 @@ jobs:
           你是数据归一专家。分析 crawl_ac 仓库的同义词冲突候选（conflicts.json）——
           每个候选是一条模式：{field, values, examples, model_count}。
 
-          对每条模式判定并输出严格 JSON（不要输出其它内容，禁止复述示例——只输出真实判定）：
+          对每条模式判定并输出严格 JSON（不要输出其它内容，禁止复述示例——只输出真实判定；
+          若没有任何 merge 判定，输出 {"decisions":[]}）：
           {"decisions":[{"field":"<字段>","values":["<写法1>","<写法2>"],"decision":"merge|skip","canonical":"<归并后值，skip 时省略>","rule":"<确定性规则描述>","confidence":0.0-1.0}]}
 
           判定规则：

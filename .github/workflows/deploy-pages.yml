@@ -61,8 +61,10 @@ jobs:
           else
             echo "no release data; skipping data preparation"
           fi
-          # 缓存失效：app.js 引用加部署版本号（CDN max-age=14400，旧 URL 自动过期）
-          sed -i "s|app.js|app.js?v=${{ github.run_id }}|g" docs/index.html
+          # 缓存失效：app.js/styles.css 引用加部署版本号（CDN max-age=14400，旧 URL 自动过期）
+          sed -i "s|__VERSION__|${{ github.run_id }}|g" docs/index.html
+          # 数据文件同样版本化（app.js 内 DATA_URL）
+          sed -i "s|data/latest.json|data/latest.json?v=${{ github.run_id }}|g" docs/app.js
 
       - name: Configure Pages
         uses: actions/configure-pages@main

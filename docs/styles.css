@@ -85,17 +85,31 @@ main { max-width: none; width: 100%; margin: 0 auto; padding: 16px; }
 .table-wrap::-webkit-scrollbar { display: none; height: 0; }
 table { width: 100%; border-collapse: collapse; font-size: 0.82rem; white-space: nowrap; }
 /* 浮动横向滚动条（wrap 外，sticky 相对页面）：默认透明，hover 表格/滚动条时浮现；
-   sticky bottom:0 在表格可见期间钉在视口底部 */
+   sticky bottom:0 在表格可见期间钉在视口底部；原生 thumb 保留（拖动目标） */
 .table-scrollbar {
-  position: sticky; bottom: 0; height: 14px; overflow-x: scroll; overflow-y: hidden;
+  position: sticky; bottom: 0; height: 16px; overflow-x: scroll; overflow-y: hidden;
   opacity: 0; transition: opacity 0.2s; background: #f1f5f9;
   border: 1px solid var(--border); border-top: none; border-radius: 0 0 10px 10px;
   cursor: pointer; z-index: 5; margin-top: -1px;
-  scrollbar-width: none; -ms-overflow-style: none;
 }
-.table-scrollbar::-webkit-scrollbar { display: none; height: 0; }
+.table-scrollbar::-webkit-scrollbar { height: 16px; }
+.table-scrollbar::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 8px; }
+.table-scrollbar::-webkit-scrollbar-track { background: transparent; }
 .table-wrap:hover ~ .table-scrollbar, .table-scrollbar:hover { opacity: 1; }
 .table-scrollbar-inner { height: 1px; }
+/* 固定表头（JS 克隆层）：竖向滚动表头出视口时钉在顶部 */
+#sticky-header {
+  position: fixed; top: 0; left: 0; z-index: 100; display: none;
+  background: #f1f5f9; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  border-bottom: 2px solid var(--border); border-radius: 0 0 8px 8px;
+  font-size: 0.82rem; white-space: nowrap; pointer-events: auto;
+}
+#sticky-header table { width: auto; border-collapse: collapse; }
+#sticky-header th {
+  padding: 8px 10px; text-align: left; cursor: pointer; user-select: none;
+  box-sizing: border-box; overflow: hidden; text-overflow: ellipsis;
+}
+#sticky-header th:hover { color: var(--accent); }
 thead th {
   background: #f1f5f9; padding: 8px 10px; text-align: left;
   border-bottom: 2px solid var(--border); position: sticky; top: 0;

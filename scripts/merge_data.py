@@ -197,6 +197,21 @@ def normalize_coil_rows(value: Any) -> str:
     return text
 
 
+def normalize_launch_date(value: Any) -> str:
+    """归一并上市时间格式：'2024 ,3月'->'2024-03'、'2026-03'->'2026-03'、
+    '2021'->'2021'、'2024年3月'->'2024-03'。粒度可不同（年/年月），
+    同粒度内格式统一（YYYY 或 YYYY-MM）。无法识别返回原值。"""
+    text = _clean(value)
+    m = re.search(r"(\d{4})\s*[,，\-/年.]*\s*(\d{1,2})?\s*月?", text)
+    if not m:
+        return text
+    year = m.group(1)
+    month = m.group(2)
+    if month:
+        return f"{year}-{int(month):02d}"
+    return year
+
+
 def parse_apf(value: Any) -> float | None:
     if value is None or value == "":
         return None
@@ -309,7 +324,8 @@ def merge_group(identity: str, rows: list[dict[str, Any]]) -> dict[str, Any]:
         merged["brand"] = normalize_brand(merged["brand"])
     for field, normalizer in (("hp", normalize_hp),
                               ("energy_grade", normalize_energy_grade),
-                              ("coil_rows", normalize_coil_rows)):
+                              ("coil_rows", normalize_coil_rows),
+                              ("launch_date", normalize_launch_date)):
         if merged.get(field):
             merged[field] = normalizer(merged[field])
     return merged

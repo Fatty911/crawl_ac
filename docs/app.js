@@ -363,12 +363,73 @@ function renderTable() {
   }
   const countEl = document.getElementById("result-count");
   if (countEl) countEl.textContent = `${filtered.length} / ${rows.length} 款`;
+  rebuildStickyHeader();
 }
 
 function renderAll() {
   renderFilters();
   renderNumericRanges();
   renderTable();
+}
+
+/* 固定表头：自然高度布局下 CSS sticky 无效（.table-wrap 是横向滚动容器），
+   用克隆 thead 的 fixed 层——页面竖向滚动表头出视口时钉在顶部，横向跟随 wrap 滚动。 */
+let stickyHeaderSynced = false;
+function setupStickyHeader() {
+  const wrap = document.querySelector(".table-wrap");
+  const table = document.getElementById("data-table");
+  if (!wrap || !table || stickyHeaderSynced) return;
+  stickyHeaderSynced = true;
+  let clone = document.getElementById("sticky-header");
+  if (!clone) {
+    clone = document.createElement("div");
+    clone.id = "sticky-header";
+    document.body.appendChild(clone);
+  }
+  const thead = table.querySelector("thead");
+
+  function sync(forceRebuild) {
+    const wrapRect = wrap.getBoundingClientRect();
+    const tableTop = table.getBoundingClientRect().top;
+    const show = tableTop < 0 && wrapRect.bottom > 60;
+    if (!show) { clone.style.display = "none"; return; }
+    if (!clone.firstChild || forceRebuild) {
+      clone.innerHTML = "";
+      const t = document.createElement("table");
+      t.innerHTML = thead.innerHTML;
+      clone.appendChild(t);
+      t.addEventListener("click", (e) => {
+        const th = e.target.closest("th");
+        if (th && th.dataset.key && th.dataset.key !== "sources") {
+          const key = th.dataset.key;
+          if (sortLevels.length > 0 && sortLevels[0].key === key) {
+            sortLevels[0].dir = sortLevels[0].dir === "desc" ? "asc" : "desc";
+          } else {
+            sortLevels = [{ key, dir: "desc" }];
+          }
+          renderTable();
+        }
+      });
+    }
+    clone.style.display = "block";
+    clone.style.left = wrapRect.left + "px";
+    clone.style.transform = "translateX(" + (-wrap.scrollLeft) + "px)";
+    const srcCols = thead.querySelectorAll("th");
+    const dstCols = clone.querySelectorAll("th");
+    srcCols.forEach((th, i) => {
+      if (dstCols[i]) dstCols[i].style.width = th.getBoundingClientRect().width + "px";
+    });
+  }
+  window.addEventListener("scroll", () => sync(false), { passive: true });
+  wrap.addEventListener("scroll", () => sync(false));
+  window.addEventListener("resize", () => sync(false));
+  sync(false);
+}
+function rebuildStickyHeader() {
+  const clone = document.getElementById("sticky-header");
+  if (clone) clone.innerHTML = "";
+  const wrap = document.querySelector(".table-wrap");
+  if (wrap) wrap.dispatchEvent(new Event("scroll"));
 }
 
 /* 浮动横向滚动条同步：inner 宽度=表格滚动宽度；拖动/滚轮双向同步 scrollLeft。
@@ -405,6 +466,7 @@ fetch(DATA_URL)
     renderSortLevels();
     renderAll();
     syncTableScrollbar();
+    setupStickyHeader();
   })
   .catch((err) => {
     const tbody = document.getElementById("table-body");

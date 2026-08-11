@@ -56,6 +56,17 @@ class TestNormalizeModelIdentity:
         assert normalize_model_identity("格力KFR-72LW/NhGh3B") == "kfr72lw/nhgh3b"
         assert normalize_model_identity("格力KFR-35GW/(35504)FNhAj-A3") == "kfr35gw/(35504)fnhaj-a3"
 
+    def test_normalize_launch_date(self):
+        # 上市时间粒度可不同（年/年月），同粒度内格式统一
+        from merge_data import normalize_launch_date
+        assert normalize_launch_date("2024 ,3月") == "2024-03"
+        assert normalize_launch_date("2024,3月") == "2024-03"
+        assert normalize_launch_date("2024年3月") == "2024-03"
+        assert normalize_launch_date("2026-03") == "2026-03"
+        assert normalize_launch_date("2025-9") == "2025-09"
+        assert normalize_launch_date("2021") == "2021"
+        assert normalize_launch_date("") == ""
+
 
 class TestParseHelpers:
     def test_parse_hp(self):

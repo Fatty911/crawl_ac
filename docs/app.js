@@ -371,6 +371,18 @@ function renderAll() {
   renderTable();
 }
 
+/* 表格容器高度 = 视口剩余空间（横向滚动条固定在可视底部，任意竖向位置可横向滑动）；
+   显示器宽度动态利用：main max-width 1800px + 表格 100% 宽 */
+function fitTableHeight() {
+  const wrap = document.querySelector(".table-wrap");
+  if (!wrap) return;
+  const top = wrap.getBoundingClientRect().top;
+  wrap.style.maxHeight = Math.max(220, Math.floor(window.innerHeight - top - 16)) + "px";
+}
+if (typeof window !== "undefined") {
+  window.addEventListener("resize", fitTableHeight);
+}
+
 fetch(DATA_URL)
   .then((r) => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
   .then((data) => {
@@ -383,6 +395,7 @@ fetch(DATA_URL)
     if (addBtn) addBtn.addEventListener("click", addSortLevel);
     renderSortLevels();
     renderAll();
+    fitTableHeight();
   })
   .catch((err) => {
     const tbody = document.getElementById("table-body");

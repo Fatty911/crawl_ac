@@ -37,8 +37,10 @@ def newest_artifact(
     session: requests.Session, repo: str, workflow: str, prefix: str
 ) -> dict[str, Any]:
     runs_url = f"{API}/repos/{repo}/actions/workflows/{workflow}/runs"
+    # 不按 status 过滤：部分 run 因后续步骤（如 Trigger merge 权限）失败但
+    # 爬取 artifact 已成功上传——结论 failure 的 run 也应提供数据
     runs = api_get(
-        session, runs_url, params={"status": "success", "branch": "main", "per_page": 20}
+        session, runs_url, params={"branch": "main", "per_page": 20}
     ).json().get("workflow_runs", [])
     for run in runs:
         artifacts_url = f"{API}/repos/{repo}/actions/runs/{run['id']}/artifacts"

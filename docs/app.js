@@ -7,6 +7,11 @@ const MAX_SORT_LEVELS = 4;
 const SORT_FIELDS = [
   { key: "source_count", label: "数据来源数（多源优先）" },
   { key: "apf", label: "APF 能效比" },
+  { key: "brand", label: "品牌" },
+  { key: "hp", label: "匹数" },
+  { key: "energy_grade", label: "能效等级" },
+  { key: "coil_rows", label: "铜管排数" },
+  { key: "throttle_type", label: "节流装置" },
   { key: "air_flow", label: "循环风量" },
   { key: "cooling_capacity", label: "制冷量" },
   { key: "heating_capacity", label: "制热量" },
@@ -41,13 +46,42 @@ function noiseMax(item) {
   return Math.max(...parts.map(Number));
 }
 
-/* 按排序级别取数值；launch_date('2025-03') 转可比较数 */
+/* 按排序级别取数值；launch_date('2025-03') 转可比较数；
+   枚举字段（品牌/匹数/能效/铜管/节流）用领域顺序：匹数大+0.1 偏移、能效新一级最前、
+   铜管按排数、节流电子膨胀阀优先、品牌 localeCompare */
 function levelValue(item, key) {
   if (key === "indoor_noise_max") return noiseMax(item);
   if (key === "launch_date") {
     const m = String(item.launch_date || "").match(/(\d{4})(?:-(\d{2}))?/);
     return m ? (m[1] + (m[2] || "00")) * 1 : null;
   }
+  if (key === "hp") {
+    const v = String(item.hp || "");
+    const m = v.match(/(\d+(?:\.\d+)?)/);
+    if (!m) return null;
+    let n = parseFloat(m[1]);
+    if (v.startsWith("大")) n += 0.1;
+    if (v.startsWith("小")) n -= 0.1;
+    return n;
+  }
+  if (key === "energy_grade") {
+    const order = { "新一级": 0.5, "1级": 1, "2级": 2, "3级": 3 };
+    const v = String(item.energy_grade || "");
+    return order[v] !== undefined ? order[v] : (v ? 999 : null);
+  }
+  if (key === "coil_rows") {
+    const v = String(item.coil_rows || "");
+    const m = v.match(/([\d.]+)/);
+    if (v.includes("双")) return 2;
+    if (v.includes("单")) return 1;
+    return m ? parseFloat(m[1]) : (v ? 999 : null);
+  }
+  if (key === "throttle_type") {
+    const order = { "电子膨胀阀": 2, "毛细管": 1 };
+    const v = String(item.throttle_type || "");
+    return order[v] !== undefined ? order[v] : (v ? 999 : null);
+  }
+  if (key === "brand") return String(item.brand || "");
   return numValue(item, key);
 }
 
@@ -64,6 +98,11 @@ function compareRows(a, b) {
     if (av === null && bv === null) continue;
     if (av === null) return level.dir === "desc" ? 1 : -1; // 空值排最后
     if (bv === null) return level.dir === "desc" ? -1 : 1;
+    if (typeof av === "string" || typeof bv === "string") {
+      const cmp = String(av).localeCompare(String(bv), "zh");
+      if (cmp !== 0) return level.dir === "desc" ? -cmp : cmp;
+      continue;
+    }
     const cmp = av - bv;
     if (cmp !== 0) return level.dir === "desc" ? -cmp : cmp;
   }

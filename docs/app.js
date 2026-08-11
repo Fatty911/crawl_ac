@@ -449,6 +449,12 @@ if (typeof window !== "undefined") {
     if (wrap && bar) {
       wrap.addEventListener("scroll", () => { bar.scrollLeft = wrap.scrollLeft; });
       bar.addEventListener("scroll", () => { wrap.scrollLeft = bar.scrollLeft; });
+      // 点击滚动条跳转（track 点击/拖动增强——原生 thumb 拖动在部分环境不可靠）
+      bar.addEventListener("click", (e) => {
+        const rect = bar.getBoundingClientRect();
+        const ratio = (e.clientX - rect.left) / rect.width;
+        bar.scrollLeft = ratio * (bar.scrollWidth - bar.clientWidth);
+      });
     }
   });
 }

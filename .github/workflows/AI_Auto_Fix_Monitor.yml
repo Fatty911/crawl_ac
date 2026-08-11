@@ -2,7 +2,7 @@ name: AI Auto Fix Monitor
 
 on:
   workflow_run:
-    workflows: ["Crawl PConline", "Crawl ZOL", "Crawl JD"]
+    workflows: ["Crawl PConline", "Crawl ZOL", "Crawl JD", "Crawl Suning", "Crawl JD Tower", "Merge and Filter"]
     types: [completed]
 
 permissions:
@@ -211,9 +211,10 @@ jobs:
         if: steps.repair_prompt.outputs.should_repair == 'true'
         continue-on-error: true
         env:
-          VOLCENGINE_AGENT_PLAN_API_KEY: ${{ secrets.VOLCENGINE_AGENT_PLAN_API_KEY }}
+          # 套餐铁律：coding 端点必须用 CodingPlan key（AgentPlan key 不可互换）
+          VOLCENGINE_CODING_PLAN_API_KEY: ${{ secrets.VOLCENGINE_CODING_PLAN_API_KEY }}
           OPENCODE_CONFIG_CONTENT: >-
-            {"autoupdate":false,"provider":{"volcengine-coding":{"npm":"@ai-sdk/openai-compatible","name":"Volcengine Coding","options":{"baseURL":"https://ark.cn-beijing.volces.com/api/coding/v3","apiKey":"{env:VOLCENGINE_AGENT_PLAN_API_KEY}"},"models":{"glm-5.2":{"limit":{"context":131072,"output":32768}}}}}},"agent":{"plan":{"model":"volcengine-coding/glm-5.2","permission":{"*":"deny","read":"allow","edit":"deny","bash":"deny","webfetch":"deny","task":"deny","question":"deny","external_directory":"deny"}}},"permission":{"*":"deny","read":"allow","edit":"deny","bash":"deny","webfetch":"deny","task":"deny","question":"deny","external_directory":"deny"}}
+            {"autoupdate":false,"provider":{"volcengine-coding":{"npm":"@ai-sdk/openai-compatible","name":"Volcengine Coding","options":{"baseURL":"https://ark.cn-beijing.volces.com/api/coding/v3","apiKey":"{env:VOLCENGINE_CODING_PLAN_API_KEY}"},"models":{"glm-5.2":{"limit":{"context":131072,"output":32768}}}}}},"agent":{"plan":{"model":"volcengine-coding/glm-5.2","permission":{"*":"deny","read":"allow","edit":"deny","bash":"deny","webfetch":"deny","task":"deny","question":"deny","external_directory":"deny"}}},"permission":{"*":"deny","read":"allow","edit":"deny","bash":"deny","webfetch":"deny","task":"deny","question":"deny","external_directory":"deny"}}
         run: >-
           cp prompt.md "$RUNNER_TEMP/opencode-agent/prompt.md" &&
           opencode run --pure --agent plan --model volcengine-coding/glm-5.2 --format default --dir "$RUNNER_TEMP/opencode-agent" --file prompt.md "Return one JSON object with exactly these top-level fields: patch, reasoning, confidence. Do not call tools or modify files." > repair_patch.json
@@ -232,6 +233,9 @@ jobs:
             "Crawl PConline") WF_FILE="crawl-pconline.yml" ;;
             "Crawl ZOL") WF_FILE="crawl-zol.yml" ;;
             "Crawl JD") WF_FILE="crawl-jd.yml" ;;
+            "Crawl Suning") WF_FILE="crawl-suning.yml" ;;
+            "Crawl JD Tower") WF_FILE="crawl-jd-tower.yml" ;;
+            "Merge and Filter") WF_FILE="merge-and-filter.yml" ;;
             *) WF_FILE="crawl-pconline.yml" ;;
           esac
           python scripts/self_repair_runner.py             --patch-file repair_patch.json             --classification "${{ steps.classify.outputs.classification }}"             --reason "${{ steps.classify.outputs.reason }}"             --workflow-name "${{ env.WORKFLOW_NAME }}"             --workflow-file "$WF_FILE"             --run-id "${{ env.WORKFLOW_RUN_ID }}"             --attempt-marker "self-repair-${{ env.WORKFLOW_RUN_ID }}-${{ env.WORKFLOW_HEAD_SHA }}"

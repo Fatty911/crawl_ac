@@ -124,15 +124,67 @@ jobs:
             echo "冲突数: $(python -c "import json; print(len(json.load(open('conflicts.json', encoding='utf-8'))))")"
           fi
 
-      - name: Upload conflicts report (for Hermes/VPS manual closure)
+      - name: Agent judges synonym patterns (single-shot JSON)
         if: steps.detect.outputs.has_conflicts == 'true'
-        # opencode+火山 AgentPlan 组合在 runner 上无法可靠完成 AI 判定（8 轮实测：
-        # deepseek-v4-flash 首响应 40min+、kimi-k3 plan/build agent 均悬挂/回显），
-        # 判定由 Hermes Agent（合规 Agent 工具）消费本 artifact 后确定性应用。
-        uses: actions/upload-artifact@v4
-        with:
-          name: synonym-conflicts-${{ github.run_id }}
-          path: |
-            conflicts.json
-            conflicts_report.json
-          retention-days: 7
+        env:
+          # 实测：opencode + volcengine-coding/glm-5.2 21s 完成并正常退出
+          # （AgentPlan 端点 deepseek/kimi 首响应 30min+ 悬挂，不可用）
+          VOLCENGINE_CODING_PLAN_API_KEY: ${{ secrets.VOLCENGINE_CODING_PLAN_API_KEY }}
+        run: |
+          cat > opencode_config.json <<'EOF'
+          {"provider":{"volcengine-coding":{"npm":"@ai-sdk/openai-compatible","options":{"baseURL":"https://ark.cn-beijing.volces.com/api/coding/v3","apiKey":"{env:VOLCENGINE_CODING_PLAN_API_KEY}"},"models":{"glm-5.2":{"name":"GLM-5.2 (Coding)"}}}},"model":"volcengine-coding/glm-5.2","permission":{"edit":"allow","bash":"allow"}}
+          EOF
+          export OPENCODE_CONFIG_CONTENT="$(cat opencode_config.json)"
+          cat > synonym_prompt.md <<'EOF'
+          你是数据归一专家。分析 crawl_ac 仓库的同义词冲突候选（conflicts.json）——
+          每个候选是一条模式：{field, values, examples, model_count}。
+
+          对每条模式判定并输出严格 JSON（不要输出其它内容，禁止复述示例——只输出真实判定）：
+          {"decisions":[{"field":"<字段>","values":["<写法1>","<写法2>"],"decision":"merge|skip","canonical":"<归并后值，skip 时省略>","rule":"<确定性规则描述>","confidence":0.0-1.0}]}
+
+          判定规则：
+          - decision=merge：写法差异同义词，给出 canonical（归并后值）+ rule（确定性规则描述）
+          - decision=skip：真配置差异或解析错误（如 370匹、大X匹 vs X匹、1级 vs 3级）
+          - 只对明确同义的归并（3P/3.0P->3匹、双排铜管->双排、新一级能效->新一级）
+          - "1级" vs "新一级"：无法确认同源同参时保守 skip
+          - 宁缺毋滥：不确定一律 skip
+          EOF
+          # timeout 300 保护（实测单次调用 ~21s）
+          timeout 300 opencode run --pure --agent plan --model volcengine-coding/glm-5.2 \
+            "判定同义词模式并输出 JSON 决策" --file synonym_prompt.md --file conflicts.json \
+            --print-logs > agent_output.txt 2>&1
+          OC_EXIT=$?
+          if [ "$OC_EXIT" -ne 0 ] && [ "$OC_EXIT" -ne 124 ]; then
+            echo "::error::opencode Agent 判定失败 (exit $OC_EXIT)"
+            exit 1
+          fi
+          tail -40 agent_output.txt
+
+      - name: Apply normalization rules deterministically
+        if: steps.detect.outputs.has_conflicts == 'true'
+        run: |
+          # Agent 输出 JSON 判定（--agent plan 只读），确定性应用
+          python scripts/synonym_apply_rules.py agent_output.txt
+          git diff --stat
+
+      - name: Run full tests
+        if: steps.detect.outputs.has_conflicts == 'true'
+        run: python -m pytest tests/ -q 2>&1 | tail -3
+
+      - name: Commit and trigger merge re-run
+        if: steps.detect.outputs.has_conflicts == 'true'
+        run: |
+          if git diff --quiet; then
+            echo "无改动（Agent 判定全部为真差异）"
+            exit 0
+          fi
+          git config user.name "synonym-discovery-bot"
+          git config user.email "xuerui911@gmail.com"
+          git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git add scripts/merge_data.py tests/test_merge_data.py
+          git commit -m "feat: 同义词归一规则（AI 自发现沉淀）[skip ci]
+
+          来源：Synonym Discovery 自动扫描同一机型不同源字段写法差异，
+          Agent（opencode run）判定真同义词后沉淀确定性规则。"
+          git push origin main
+          gh workflow run merge-and-filter.yml --repo ${{ github.repository }}

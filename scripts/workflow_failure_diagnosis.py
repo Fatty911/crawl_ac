@@ -18,7 +18,7 @@ try:
 except ModuleNotFoundError:
     from classify_crawl_failure import classify
 
-CRAWLER_WORKFLOWS = {"Crawl ZOL", "Crawl JD", "Crawl PConline"}
+CRAWLER_WORKFLOWS = {"Crawl ZOL", "Crawl JD", "Crawl PConline", "Crawl Suning", "Crawl JD Tower"}
 
 EXPECTED_SKIP_MARKERS = (
     "不在 08:00-12:30 或 13:00-22:00 爬取窗口",

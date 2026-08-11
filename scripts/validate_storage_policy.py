@@ -20,6 +20,7 @@ ARTIFACT_POLICIES = (
     ("suning-data-", 30),
     ("leader-data-", 30),
     ("gree-data-", 30),
+    ("midea-data-", 30),
     ("pconline-ai-patch-", 7),
     ("pconline-validation-", 14),
     ("pconline-review-", 14),

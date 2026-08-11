@@ -65,7 +65,7 @@ def test_merge_only_runs_for_successful_source_completion_or_manual_dispatch():
 
     assert event_config["workflow_run"]["workflows"] == [
         "Crawl ZOL", "Crawl JD", "Crawl PConline", "Crawl Suning",
-        "Crawl Leader", "Crawl Gree", "Crawl JD Tower"]
+        "Crawl Leader", "Crawl Gree", "Crawl Midea Mall", "Crawl JD Tower"]
     assert event_config["workflow_run"]["types"] == ["completed"]
     assert "workflow_dispatch" in event_config
 

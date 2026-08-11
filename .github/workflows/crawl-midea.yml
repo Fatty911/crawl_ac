@@ -1,0 +1,81 @@
+name: Crawl Midea Mall
+
+on:
+  workflow_dispatch:
+    inputs:
+      debug_mode:
+        description: "Enable debug logging"
+        required: false
+        default: "false"
+        type: choice
+        options: ["true", "false"]
+  schedule:
+    - cron: "30 3 * * *"
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: crawl-midea
+  cancel-in-progress: false
+
+env:
+  PYTHONUNBUFFERED: "1"
+
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      status: ${{ steps.crawl.outputs.status }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          # 美的商城 SPA 需 Playwright 渲染
+          pip install playwright
+          python -m playwright install chromium --with-deps
+
+      - name: Setup proxy runtime
+        env:
+          PROXY_SUBSCRIPTIONS: ${{ secrets.PROXY_SUBSCRIPTIONS }}
+        run: >-
+          python scripts/setup_proxy_runtime.py
+          --require-proxy
+          --test-url
+          https://www.midea.cn/
+
+      - name: Crawl Midea mall (Midea + Hualing)
+        id: crawl
+        run: |
+          mkdir -p data/raw/midea
+          python scripts/crawl_midea.py \
+            --output data/raw/midea/latest.json \
+            --time-budget 900 \
+            --min-records 5 \
+            --proxy "http://127.0.0.1:7890"
+          echo "status=success" >> "$GITHUB_OUTPUT"
+          COUNT=$(python -c "import json; d=json.load(open('data/raw/midea/latest.json')); print(len(d.get('items', [])))")
+          echo "count=$COUNT" >> "$GITHUB_OUTPUT"
+
+      - name: Upload artifact
+        if: steps.crawl.outputs.status == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: midea-data-${{ github.run_id }}
+          path: data/raw/midea/latest.json
+          retention-days: 30
+
+      - name: Trigger merge
+        if: steps.crawl.outputs.status == 'success'
+        run: |
+          gh workflow run merge-and-filter.yml --repo ${{ github.repository }}
+        env:
+          GH_TOKEN: ${{ secrets.ACTION_PAT || github.token }}

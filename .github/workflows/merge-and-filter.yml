@@ -3,7 +3,7 @@ name: Merge and Filter
 on:
   workflow_dispatch:
   workflow_run:
-    workflows: ["Crawl ZOL", "Crawl JD", "Crawl PConline", "Crawl Suning", "Crawl Leader", "Crawl Gree", "Crawl JD Tower"]
+    workflows: ["Crawl ZOL", "Crawl JD", "Crawl PConline", "Crawl Suning", "Crawl Leader", "Crawl Gree", "Crawl Midea Mall", "Crawl JD Tower"]
     types: [completed]
 
 permissions:
@@ -46,7 +46,7 @@ jobs:
       - name: Download latest complete crawler artifacts
         id: artifacts
         run: |
-          mkdir -p data/raw/pconline data/raw/zol data/raw/jd data/raw/jd/tower data/raw/suning data/raw/leader data/raw/gree
+          mkdir -p data/raw/pconline data/raw/zol data/raw/jd data/raw/jd/tower data/raw/suning data/raw/leader data/raw/gree data/raw/midea
           echo "skip=false" >> "$GITHUB_OUTPUT"
           set +e
           python scripts/download_latest_crawler_artifact.py \
@@ -75,6 +75,9 @@ jobs:
           jd_status=$?
           python scripts/download_latest_crawler_artifact.py             --repo "$GITHUB_REPOSITORY"             --workflow crawl-suning.yml             --artifact-prefix suning-data-             --output data/raw/suning/latest.json             --min-records 50             2> >(tee "$RUNNER_TEMP/suning-artifact.err" >&2)
           suning_status=$?
+          midea_status=0
+          python scripts/download_latest_crawler_artifact.py             --repo "$GITHUB_REPOSITORY"             --workflow crawl-midea.yml             --artifact-prefix midea-data-             --output data/raw/midea/latest.json             --min-records 5             2> >(tee "$RUNNER_TEMP/midea-artifact.err" >&2)
+          midea_status=$?
           gree_status=0
           python scripts/download_latest_crawler_artifact.py             --repo "$GITHUB_REPOSITORY"             --workflow crawl-gree.yml             --artifact-prefix gree-data-             --output data/raw/gree/latest.json             --min-records 5             2> >(tee "$RUNNER_TEMP/gree-artifact.err" >&2)
           gree_status=$?
@@ -112,6 +115,7 @@ jobs:
           if [ "$jd_tower_status" -eq 0 ]; then AVAILABLE="$AVAILABLE data/raw/jd/tower/latest.json"; fi
           if [ "$leader_status" -eq 0 ]; then AVAILABLE="$AVAILABLE data/raw/leader/latest.json"; fi
           if [ "$gree_status" -eq 0 ]; then AVAILABLE="$AVAILABLE data/raw/gree/latest.json"; fi
+          if [ "$midea_status" -eq 0 ]; then AVAILABLE="$AVAILABLE data/raw/midea/latest.json"; fi
           if [ "$suning_status" -eq 0 ]; then AVAILABLE="$AVAILABLE data/raw/suning/latest.json"; fi
           echo "AVAILABLE_ARTIFACTS=$AVAILABLE" >> "$GITHUB_ENV"
 

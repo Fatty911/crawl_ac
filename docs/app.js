@@ -371,16 +371,25 @@ function renderAll() {
   renderTable();
 }
 
-/* 表格容器高度 = 视口剩余空间（横向滚动条固定在可视底部，任意竖向位置可横向滑动）；
-   显示器宽度动态利用：main max-width 1800px + 表格 100% 宽 */
-function fitTableHeight() {
+/* 浮动横向滚动条同步：inner 宽度=表格滚动宽度；拖动/滚轮双向同步 scrollLeft。
+   表格自然高度（页面竖向滚动），滚动条 hover 浮现并 sticky 钉在视口底部。 */
+function syncTableScrollbar() {
   const wrap = document.querySelector(".table-wrap");
-  if (!wrap) return;
-  const top = wrap.getBoundingClientRect().top;
-  wrap.style.maxHeight = Math.max(220, Math.floor(window.innerHeight - top - 16)) + "px";
+  const bar = document.getElementById("table-scrollbar");
+  if (!wrap || !bar) return;
+  const inner = bar.querySelector(".table-scrollbar-inner");
+  if (inner) inner.style.width = Math.max(wrap.scrollWidth, wrap.clientWidth + 1) + "px";
+  bar.scrollLeft = wrap.scrollLeft;
 }
 if (typeof window !== "undefined") {
-  window.addEventListener("resize", fitTableHeight);
+  document.addEventListener("DOMContentLoaded", () => {
+    const wrap = document.querySelector(".table-wrap");
+    const bar = document.getElementById("table-scrollbar");
+    if (wrap && bar) {
+      wrap.addEventListener("scroll", () => { bar.scrollLeft = wrap.scrollLeft; });
+      bar.addEventListener("scroll", () => { wrap.scrollLeft = bar.scrollLeft; });
+    }
+  });
 }
 
 fetch(DATA_URL)
@@ -395,7 +404,7 @@ fetch(DATA_URL)
     if (addBtn) addBtn.addEventListener("click", addSortLevel);
     renderSortLevels();
     renderAll();
-    fitTableHeight();
+    syncTableScrollbar();
   })
   .catch((err) => {
     const tbody = document.getElementById("table-body");

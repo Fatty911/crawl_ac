@@ -49,6 +49,8 @@ BRAND_ALIASES = {
     "changhong": "长虹",
     "wahin": "华凌",
     "华凌": "华凌",
+    "leader": "统帅",
+    "统帅": "统帅",
     "xiaomi": "小米",
     "米家": "小米",
     "daikin": "大金",
@@ -57,6 +59,16 @@ BRAND_ALIASES = {
     "chigo": "志高",
     "skyworth": "创维",
     "konka": "康佳",
+    "Leader": "统帅",
+    "LEADER": "统帅",
+    "TONG SHUAI": "统帅",
+    "Tongshuai": "统帅",
+    "Colmo": "COLMO",
+    "Wahin": "华凌",
+    "KELON": "科龙",
+    "Kelon": "科龙",
+    "卡萨帝": "卡萨帝",
+    "CASARTE": "卡萨帝",
 }
 
 # 空调型号模式：KFR-35GW/N8HA1Ⅲ-P、KFR-72LW/N8KS1-1U、KF-26GW/...、KFRD-...
@@ -125,25 +137,24 @@ def _clean(value: Any) -> str:
 
 
 def normalize_brand(value: Any) -> str:
-    """品牌别名归一化：Leader→统帅（京东等源用英文名），其它品牌名统一。"""
+    """品牌别名归一化 + 污染串清洗（brand 被标题污染如 '统帅KFR-50GW/18MDA81TU1'）。
+    精确匹配优先；否则子串提取品牌词；再否则取中文字符前缀。"""
     text = _clean(value)
     if not text:
         return ""
-    return BRAND_ALIASES.get(text, text)
+    if text in BRAND_ALIASES:
+        return BRAND_ALIASES[text]
+    for key, alias in BRAND_ALIASES.items():
+        if len(key) > 1 and key in text:
+            return alias
+    # 中文字符前缀（品牌词通常 2-4 个中文字符开头）
+    m = re.match(r"^[\u4e00-\u9fff]{2,4}", text)
+    if m:
+        return m.group(0)
+    return text
 
 
-# 品牌别名（英文/变体 → 中文统一名）
-BRAND_ALIASES = {
-    "Leader": "统帅",
-    "LEADER": "统帅",
-    "leader": "统帅",
-    "TONG SHUAI": "统帅",
-    "Tongshuai": "统帅",
-    "Colmo": "COLMO",
-    "Wahin": "华凌",
-    "KELON": "科龙",
-    "Kelon": "科龙",
-}
+# 品牌别名（英文/变体 → 中文统一名）——统一在文件头 BRAND_ALIASES（勿重复定义）
 
 
 # AI 自发现沉淀的同义词映射（Synonym Discovery workflow 写入，勿手改）

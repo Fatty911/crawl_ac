@@ -124,9 +124,14 @@ def parse_ranking_page(html: Any, page: int, brand: str | None = None) -> list[d
 def infer_brand(title: str) -> str:
     text = clean_text(title)
     for name in ("格力", "美的", "海尔", "奥克斯", "TCL", "海信", "科龙",
-                 "长虹", "华凌", "小米", "三菱", "大金", "松下", "志高", "创维"):
+                 "长虹", "华凌", "小米", "统帅", "三菱", "大金", "松下",
+                 "志高", "创维", "卡萨帝"):
         if name in text:
             return name
+    # 无空格标题（如 "统帅KFR-50GW/18MDA81TU1"）：提取中文字符前缀品牌词
+    m = re.match(r"^[\u4e00-\u9fff]{2,4}", text)
+    if m:
+        return m.group(0)
     return clean_text(title).split(" ", 1)[0][:24]
 
 

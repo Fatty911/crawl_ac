@@ -67,6 +67,16 @@ class TestNormalizeModelIdentity:
         assert normalize_launch_date("2021") == "2021"
         assert normalize_launch_date("") == ""
 
+    def test_normalize_brand_cleans_polluted(self):
+        # 品牌被标题污染（ZOL infer_brand fallback 整串）→ 清洗为品牌词
+        from merge_data import normalize_brand
+        assert normalize_brand("统帅KFR-50GW/18MDA81TU1") == "统帅"
+        assert normalize_brand("海尔KFR-35GW/20MCC83") == "海尔"
+        assert normalize_brand("Leader") == "统帅"
+        assert normalize_brand("leader") == "统帅"
+        assert normalize_brand("格力") == "格力"
+        assert normalize_brand("") == ""
+
 
 class TestParseHelpers:
     def test_parse_hp(self):

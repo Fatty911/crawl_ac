@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from typing import Any
 
@@ -142,7 +143,20 @@ def main() -> int:
 
         # 5) 数据质量（页面内 fetch latest.json）
         quality = {"total": 0, "with_model": 0, "with_apf": 0, "with_hp": 0,
-                   "with_energy": 0, "multi_source": 0}
+                   "with_energy": 0, "multi_source": 0,
+                   "brand_polluted": 0, "unknown_brands": [],
+                   "bad_hp": [], "bad_energy": [], "bad_coil": [], "bad_throttle": []}
+        # 枚举字段值域（用户教训：字段污染/异常值必须被值域检查拦截——
+        # 如 brand 混入型号 '统帅KFR-50GW/18MDA81TU1' 成孤立筛选项）
+        KNOWN_BRANDS = {
+            "格力", "美的", "海尔", "奥克斯", "TCL", "海信", "科龙", "长虹",
+            "华凌", "小米", "米家", "统帅", "COLMO", "卡萨帝", "三菱电机",
+            "三菱重工", "大金", "松下", "志高", "创维", "康佳", "格兰仕",
+            "月兔", "申花", "云米", "追觅", "海信空调", "TCL空调",
+        }
+        HP_PATTERN = re.compile(r"^(大|小)?\d+(\.\d+)?匹$")
+        KNOWN_ENERGY = {"新一级", "1级", "2级", "3级"}
+        KNOWN_THROTTLE = {"电子膨胀阀", "毛细管", "未知"}
         items = page.evaluate("""async () => {
             try {
                 const r = await fetch('/data/latest.json', {cache: 'no-store'});
@@ -155,6 +169,11 @@ def main() -> int:
             report["ok"] = False
         else:
             quality["total"] = len(items)
+            unknown_brands = set()
+            bad_hp = set()
+            bad_energy = set()
+            bad_coil = set()
+            bad_throttle = set()
             for it in items:
                 model = str(it.get("model") or it.get("title") or "")
                 if model.startswith("KFR") or "KFR" in model:
@@ -167,6 +186,29 @@ def main() -> int:
                     quality["with_energy"] += 1
                 if len(it.get("atomic_source_names", [])) >= 2:
                     quality["multi_source"] += 1
+                # 值域检查
+                b = str(it.get("brand") or "")
+                if "KFR" in b:
+                    quality["brand_polluted"] += 1
+                elif b and b not in KNOWN_BRANDS:
+                    unknown_brands.add(b)
+                hp = str(it.get("hp") or "")
+                if hp and not HP_PATTERN.match(hp):
+                    bad_hp.add(hp)
+                eg = str(it.get("energy_grade") or "")
+                if eg and eg not in KNOWN_ENERGY:
+                    bad_energy.add(eg)
+                cr = str(it.get("coil_rows") or "")
+                if cr and cr not in ("未知",) and not re.match(r"^[\d.]+排$|^双排$|^单排$", cr):
+                    bad_coil.add(cr)
+                tt = str(it.get("throttle_type") or "")
+                if tt and tt not in KNOWN_THROTTLE:
+                    bad_throttle.add(tt)
+            quality["unknown_brands"] = sorted(unknown_brands)[:10]
+            quality["bad_hp"] = sorted(bad_hp)[:10]
+            quality["bad_energy"] = sorted(bad_energy)[:10]
+            quality["bad_coil"] = sorted(bad_coil)[:10]
+            quality["bad_throttle"] = sorted(bad_throttle)[:10]
             report["checks"]["quality"] = quality
             if quality["total"] > 0:
                 apf_rate = quality["with_apf"] / quality["total"]
@@ -174,6 +216,23 @@ def main() -> int:
                     report["ok"] = False
                     report["checks"]["quality_check"] = (
                         f"FAIL: APF 覆盖率 {apf_rate:.0%} < 50%")
+            # 值域门禁：字段污染/未知值 → FAIL（自发现盲区补齐）
+            if quality["brand_polluted"]:
+                report["ok"] = False
+                report["checks"]["brand_check"] = (
+                    f"FAIL: {quality['brand_polluted']} 条品牌被型号污染")
+            if unknown_brands:
+                report["ok"] = False
+                report["checks"]["brand_check"] = (
+                    f"FAIL: 未知品牌 {sorted(unknown_brands)[:5]}")
+            if bad_hp or bad_energy or bad_coil or bad_throttle:
+                report["ok"] = False
+                report["checks"]["value_check"] = {
+                    "bad_hp": sorted(bad_hp)[:5],
+                    "bad_energy": sorted(bad_energy)[:5],
+                    "bad_coil": sorted(bad_coil)[:5],
+                    "bad_throttle": sorted(bad_throttle)[:5],
+                }
         browser.close()
 
     report["ok"] = bool(report["ok"])

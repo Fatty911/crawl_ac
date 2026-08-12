@@ -373,9 +373,9 @@ def main() -> int:
     if len(rows_by_source) < 1:
         print("FAIL: no usable source artifacts")
         return 2
-    # 官方源（Leader/Gree 等官网）数据量天然少（官网在售产品数有限），
+    # 官方源（Leader/Gree/MideaMall 等官网）数据量天然少（官网在售产品数有限），
     # 豁免 min-source-records——它们的价值是官方一手参数佐证
-    OFFICIAL_SOURCES = {"Leader", "Gree"}
+    OFFICIAL_SOURCES = {"Leader", "Gree", "MideaMall"}
     for source, items in rows_by_source.items():
         if source in OFFICIAL_SOURCES:
             continue

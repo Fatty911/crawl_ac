@@ -1,0 +1,111 @@
+name: Pages Live Verify
+
+# 访问线上 Pages 解析 JS 获取数据，验证是否符合预期（渲染/数据/功能/质量）。
+# 不符合 → AI 诊断（opencode glm-5.2）→ issue 归档（自发现闭环；自动修复由
+# AI_Auto_Fix_Monitor 或 Hermes 消费诊断结果）。
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 4 * * *"
+  workflow_run:
+    workflows: ["Deploy Pages"]
+    types: [completed]
+
+permissions:
+  contents: read
+  issues: write
+  actions: read
+
+concurrency:
+  group: pages-verify
+  cancel-in-progress: false
+
+env:
+  GH_TOKEN: ${{ secrets.ACTION_PAT || github.token }}
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install playwright
+          python -m playwright install chromium --with-deps
+
+      - name: Verify live pages (render JS, fetch data, check expectations)
+        id: verify
+        run: |
+          python scripts/pages_verify.py \
+            --output verify_report.json \
+            --expected-count 0 || true
+          echo "verify_ok=$(python -c "import json; print(str(json.load(open('verify_report.json'))['ok']).lower())" 2>/dev/null || echo false)" >> "$GITHUB_OUTPUT"
+          echo "report saved"
+
+      - name: Upload verify report
+        if: steps.verify.outputs.verify_ok == 'false'
+        uses: actions/upload-artifact@v4
+        with:
+          name: pages-verify-report-${{ github.run_id }}
+          path: verify_report.json
+          retention-days: 14
+
+      - name: Set up Node.js + OpenCode CLI (AI diagnosis)
+        if: steps.verify.outputs.verify_ok == 'false'
+        uses: actions/setup-node@main
+        with:
+          node-version: "22"
+
+      - name: Install OpenCode CLI
+        if: steps.verify.outputs.verify_ok == 'false'
+        # pin 1.18.11：@latest 新版 CLI 移除 --agent plan 参数
+        run: npm install --global opencode-ai@1.18.11
+
+      - name: AI diagnosis of verify failures
+        if: steps.verify.outputs.verify_ok == 'false'
+        continue-on-error: true
+        env:
+          VOLCENGINE_CODING_PLAN_API_KEY: ${{ secrets.VOLCENGINE_CODING_PLAN_API_KEY }}
+        run: |
+          cat > opencode_config.json <<'EOF'
+          {"provider":{"volcengine-coding":{"npm":"@ai-sdk/openai-compatible","options":{"baseURL":"https://ark.cn-beijing.volces.com/api/coding/v3","apiKey":"{env:VOLCENGINE_CODING_PLAN_API_KEY}"},"models":{"glm-5.2":{"name":"GLM-5.2 (Coding)"}}}},"model":"volcengine-coding/glm-5.2","permission":{"edit":"allow","bash":"allow"}}
+          EOF
+          export OPENCODE_CONFIG_CONTENT="$(cat opencode_config.json)"
+          cat > verify_prompt.md <<'EOF'
+          你是前端/数据工程师。分析线上 Pages 验证失败报告（verify_report.json）——
+          {ok, checks:{console_errors, data_load, dom, sort_changed, quality, ...}}。
+          输出严格 JSON（不要其它内容）：
+          {"root_cause":"<最可能根因>","impact":"<影响范围>","fix_hint":"<修复方向/文件>","confidence":0.0-1.0}
+          若验证失败源于偶发网络（如资源加载 ERR_CONNECTION），root_cause 注明"可能是偶发"。
+          EOF
+          timeout 300 opencode run --pure --agent plan --model volcengine-coding/glm-5.2 \
+            "分析 Pages 验证失败并输出 JSON 诊断" --file verify_prompt.md --file verify_report.json \
+            --print-logs > verify_diagnosis.json 2>&1
+          tail -5 verify_diagnosis.json
+
+      - name: File diagnosis issue
+        if: steps.verify.outputs.verify_ok == 'false'
+        run: |
+          TITLE="[Pages验证] 线上检查未通过: $(date -u +%Y-%m-%dT%H:%MZ)"
+          {
+            echo "- 验证报告:"
+            echo '```'
+            head -c 4000 verify_report.json
+            echo '```'
+            if [ -s verify_diagnosis.json ]; then
+              echo
+              echo "## AI 诊断（glm-5.2）"
+              echo '```'
+              tail -c 2000 verify_diagnosis.json
+              echo '```'
+            fi
+          } > issue_body.md
+          gh issue create --title "$TITLE" --body-file issue_body.md --label "pages-verify" || true

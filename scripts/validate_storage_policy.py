@@ -17,6 +17,7 @@ ARTIFACT_POLICIES = (
     ("jd-data-", 30),
     ("jd-tower-data-", 30),
     ("synonym-conflicts-", 7),
+    ("pages-verify-report-", 14),
     ("suning-data-", 30),
     ("leader-data-", 30),
     ("gree-data-", 30),

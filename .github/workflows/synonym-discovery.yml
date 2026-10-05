@@ -1,3 +1,7 @@
+# ── GitHub Actions 硬开关（2026-10-05 用户裁定）────────────────────────
+# GitHub 账户曾因反滥用机制误伤暂停，爬虫/AI 自修复禁止在 Actions 运行。
+# 工作流主力 = 腾讯云 CNB（.cnb.yml）。此处 if:false 防止 UI 误开后仍执行。
+# 七端代码对等同步，仅工作流免费资源不同。
 name: Synonym Discovery
 
 # 同义词自发现自优化：merge 后扫描同一机型（identity）不同源的字段写法差异，
@@ -25,6 +29,7 @@ env:
 
 jobs:
   discover:
+    if: false  # CNB 为工作流主力，GitHub Actions 禁跑爬虫/AI 自修复
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:

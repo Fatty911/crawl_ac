@@ -216,12 +216,12 @@ jobs:
         continue-on-error: true
         env:
           # 套餐铁律：coding 端点必须用 CodingPlan key（AgentPlan key 不可互换）
-          VOLCENGINE_CODING_PLAN_API_KEY: ${{ secrets.VOLCENGINE_CODING_PLAN_API_KEY }}
+          NVIDIA_NIM_API_KEY: ${{ secrets.NVIDIA_NIM_API_KEY }}
           OPENCODE_CONFIG_CONTENT: >-
-            {"autoupdate":false,"provider":{"volcengine-coding":{"npm":"@ai-sdk/openai-compatible","name":"Volcengine Coding","options":{"baseURL":"https://ark.cn-beijing.volces.com/api/coding/v3","apiKey":"{env:VOLCENGINE_CODING_PLAN_API_KEY}"},"models":{"glm-5.2":{"limit":{"context":131072,"output":32768}}}}}},"agent":{"plan":{"model":"volcengine-coding/glm-5.2","permission":{"*":"deny","read":"allow","edit":"deny","bash":"deny","webfetch":"deny","task":"deny","question":"deny","external_directory":"deny"}}},"permission":{"*":"deny","read":"allow","edit":"deny","bash":"deny","webfetch":"deny","task":"deny","question":"deny","external_directory":"deny"}}
+            {"autoupdate":false,"provider":{"nvidia-nim":{"npm":"@ai-sdk/openai-compatible","name":"NVIDIA NIM","options":{"baseURL":"https://integrate.api.nvidia.com/v1","apiKey":"{env:NVIDIA_NIM_API_KEY}"},"models":{"z-ai/glm-5.2":{"limit":{"context":131072,"output":32768}}}}}},"agent":{"plan":{"model":"nvidia-nim/z-ai/glm-5.2","permission":{"*":"deny","read":"allow","edit":"deny","bash":"deny","webfetch":"deny","task":"deny","question":"deny","external_directory":"deny"}}},"permission":{"*":"deny","read":"allow","edit":"deny","bash":"deny","webfetch":"deny","task":"deny","question":"deny","external_directory":"deny"}}
         run: >-
           cp prompt.md "$RUNNER_TEMP/opencode-agent/prompt.md" &&
-          opencode run --pure --agent plan --model volcengine-coding/glm-5.2 --format default --dir "$RUNNER_TEMP/opencode-agent" --file prompt.md "Return one JSON object with exactly these top-level fields: patch, reasoning, confidence. Do not call tools or modify files." > repair_patch.json
+          opencode run --pure --agent plan --model nvidia-nim/z-ai/glm-5.2 --format default --dir "$RUNNER_TEMP/opencode-agent" --file prompt.md "Return one JSON object with exactly these top-level fields: patch, reasoning, confidence. Do not call tools or modify files." > repair_patch.json
 
       - name: Apply and validate self-repair
         id: self_repair

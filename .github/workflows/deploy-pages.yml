@@ -21,8 +21,9 @@ concurrency:
 jobs:
   deploy:
     if: >-
-      github.event_name == 'workflow_dispatch' ||
-      github.event.workflow_run.conclusion == 'success'
+      (github.event_name != 'release' || (github.event.release.tag_name != 'data-latest' && !startsWith(github.event.release.tag_name, 'cnb-data-'))) &&
+      (github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment:

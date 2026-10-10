@@ -48,9 +48,9 @@ jobs:
       - name: Download latest verified Release
         run: |
           mkdir -p release
-          gh release download data-latest \
+          python scripts/download_verified_release.py --repo "$GITHUB_REPOSITORY" \
             --pattern ac-latest.json \
-            --dir release || { echo "no data-latest release yet"; exit 0; }
+            --dir release
 
       - name: Prepare Pages data
         run: |

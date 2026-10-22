@@ -115,6 +115,8 @@ python -m http.server 8000 --directory docs
 
 ## Actions 与发布
 
+> 仓库配置将主流水线放在 `.cnb.yml`；GitHub `ci.yml` 的 CI job 为 `if: false`，远端运行状态本次未验证。
+
 - `crawl-pconline.yml`：太平洋热度榜（周一/每日定时 + 手动）。
 - `crawl-zol.yml` / `crawl-jd.yml`：ZOL/JD 排行（需机场节点，`--require-proxy`）。
 - `crawl-trigger.yml`：外部 cron-job.org 触发 + 北京时间窗口预算。
